@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How It Works | RoZAG Social Feed</title>
+<meta name="description" content="RoZAG Social Feed helps participating community creators share their public social content with the RoZAG community.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="container nav">
+<a class="brand" href="index.html"><span class="mark">R</span><span>RoZAG Social Feed</span></a>
+
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">How It Works</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+
+</div></header>
+<main>
+<div class="container page prose">
+  <div class="eyebrow">How it works</div>
+  <h1>Built for community sharing</h1>
+  <p>RoZAG Social Feed is intended to reduce repetitive checking for participating creators and community moderators. The service monitors only the sources and permissions that a creator has intentionally connected.</p>
+  <h2>1. A creator connects an account</h2>
+  <p>When a supported platform requires authorization, the creator signs in through that platform's official authorization flow and grants only the permissions requested by the application.</p>
+  <h2>2. The service checks permitted content</h2>
+  <p>The application retrieves the content information allowed by the platform's API and the creator's authorization. For the initial TikTok integration, the intended use is retrieving a participating creator's permitted public video information.</p>
+  <h2>3. A link is shared with the community</h2>
+  <p>When new content is detected, the service can publish a link and basic identifying information such as the creator name and video title to the configured RoZAG community Discord feed.</p>
+  <h2>4. Duplicate posts are avoided</h2>
+  <p>The service records identifiers for content it has already processed so the same link is not repeatedly posted.</p>
+  <h2>What the service does not do</h2>
+  <ul>
+    <li>It does not claim to be TikTok, YouTube, Twitch, or Discord.</li>
+    <li>It does not remove watermarks or alter creator content.</li>
+    <li>It does not sell creator data.</li>
+    <li>It does not request permissions that are unnecessary for the intended feature.</li>
+    <li>It does not publish content to a creator's social account as part of the feed feature.</li>
+  </ul>
+  <div class="notice"><strong>Important:</strong> The final production behavior will be limited by the permissions and API access approved by each platform.</div>
+</div>
+</main>
+<footer><div class="container">
+<strong>RoZAG Social Feed</strong><br>
+<span class="small">An independent community project. Not affiliated with TikTok, YouTube, Twitch, Discord, or their respective owners.</span>
+</div></footer>
+</body>
+</html>
