@@ -1,21 +1,25 @@
-# RoZAG Social Feed website
+# RoZAG Social Hub — GitHub Pages website
 
-This is a static website intended to provide the public website, Privacy Policy,
-Terms of Service, and project information for the RoZAG Social Feed application.
+This package is the polished RoZAG Social Hub public website designed for GitHub Pages.
 
-## Before publishing
+## Upload
 
-1. Replace the placeholder contact wording on `contact.html` with a real contact
-   method that you control.
-2. Review the Privacy Policy and Terms of Service and edit them to accurately
-   describe the final application.
-3. Do not publish API keys, client secrets, access tokens, refresh tokens, Discord
-   webhooks, or other credentials in this website repository.
+Replace the existing website files in the repository with the contents of this folder. Keep the TikTok verification file from the current repository if TikTok is still using it; this package does not overwrite that file.
 
-## GitHub Pages
+## Important configuration
 
-This site is plain HTML/CSS and can be published with GitHub Pages. See:
-https://docs.github.com/en/pages/getting-started-with-github-pages
+Edit `config.js` before publishing if your backend's public read-only status endpoint is not:
 
-After publishing, use the live HTTPS URL in the TikTok developer app. TikTok
-requires URL ownership verification for relevant app URLs before review.
+`https://rozag.coolvetspaces.com/api/status`
+
+Also replace `YOUR_DISCORD_CLIENT_ID` in `index.html` with the actual Discord application client ID. Never put bot tokens, OAuth secrets, refresh tokens or database credentials in this repository.
+
+## Support
+
+The site uses the current RoZAG Social Hub support invite:
+
+https://discord.gg/rJFUWAGWHH
+
+## Share controls
+
+The share panel includes Discord/native share, X/Twitter, Facebook, Reddit, WhatsApp and Copy Link. The native Discord button uses the browser/device share sheet when available.

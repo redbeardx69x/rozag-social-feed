@@ -1,52 +1,124 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Home | RoZAG Social Feed</title>
-<meta name="description" content="RoZAG Social Feed helps participating community creators share their public social content with the RoZAG community.">
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="RoZAG Social Hub connects Discord communities to creator feeds from YouTube, TikTok and Twitch.">
+  <meta property="og:title" content="RoZAG Social Hub">
+  <meta property="og:description" content="Social feeds, built for Discord.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://redbeardx69x.github.io/rozag-social-feed/">
+  <title>RoZAG Social Hub</title>
+  <link rel="icon" href="assets/rozag-logo.png">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><div class="container nav">
-<a class="brand" href="index.html"><span class="mark">R</span><span>RoZAG Social Feed</span></a>
+<header class="site-header">
+  <a class="brand" href="./" aria-label="RoZAG Social Hub home">
+    <img src="assets/rozag-logo.png" alt="RoZAG logo">
+    <span>ROZAG SOCIAL HUB</span>
+  </a>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="#status">Status</a>
+    <a href="terms.html">Terms</a>
+    <a href="privacy.html">Privacy</a>
+    <a class="support-link" href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Discord Support</a>
+  </nav>
+  <a class="btn btn-primary top-cta" href="https://discord.com/oauth2/authorize?client_id=YOUR_DISCORD_CLIENT_ID&permissions=0&scope=bot%20applications.commands" target="_blank" rel="noopener">Add to Discord</a>
+</header>
 
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="about.html">How It Works</a>
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-
-</div></header>
 <main>
-<div class="container hero">
-  <div class="eyebrow">Community content hub</div>
-  <h1>RoZAG Social Feed</h1>
-  <p class="lead">A community tool designed to help participating creators share their latest public social content with the RoZAG community in one place.</p>
-  <a class="cta" href="about.html">See how it works</a>
-</div>
-<section>
-<div class="container">
-  <div class="grid">
-    <article class="card"><h3>Creator-first</h3><p>Creators choose whether to connect an account. The service is intended to work only with content and account data that the creator has authorized the application to access.</p></article>
-    <article class="card"><h3>Community sharing</h3><p>New public content can be surfaced to the community feed so members can discover videos without manually checking every creator's profile.</p></article>
-    <article class="card"><h3>Simple & focused</h3><p>The project is built around content discovery and community sharing. It does not sell creator data or attempt to modify creator content.</p></article>
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">ONE CREW. ONE HUB. EVERY FEED.</div>
+    <h1>Social feeds,<br><span>built for Discord.</span></h1>
+    <p class="lead">RoZAG Social Hub connects your Discord community to creator feeds from YouTube, TikTok and Twitch — automatically creating channels, handling authorizations and delivering new content where your community can see it. Creator Watch lets a server follow creators who are not Discord members.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="https://discord.com/oauth2/authorize?client_id=YOUR_DISCORD_CLIENT_ID&permissions=0&scope=bot%20applications.commands" target="_blank" rel="noopener">Add RoZAG to Discord</a>
+      <a class="btn btn-secondary" href="#features">Explore the Hub</a>
+    </div>
   </div>
-</div>
+
+  <aside class="status-card" id="status" aria-live="polite">
+    <img class="status-logo" src="assets/rozag-logo.png" alt="">
+    <h2>RoZAG Social Hub</h2>
+    <p class="status-subtitle">Live service status</p>
+    <div class="status-row"><span>Discord Bot</span><strong id="bot-status"><i class="dot dot-amber"></i> Checking</strong></div>
+    <div class="status-row"><span>Servers connected</span><strong id="server-count">—</strong></div>
+    <div class="status-row"><span>Last heartbeat</span><strong id="heartbeat">—</strong></div>
+    <div class="status-updated" id="status-updated">Checking service…</div>
+  </aside>
 </section>
-<section>
-<div class="container prose">
-  <h2>What this service does</h2>
-  <p>RoZAG Social Feed is an independent community project. Participating creators can authorize supported social integrations so the service can retrieve permitted public content and share links with the RoZAG community.</p>
-  <div class="notice"><strong>Third-party services:</strong> TikTok, YouTube, Twitch and Discord are independent services. RoZAG Social Feed is not owned, operated, endorsed, or sponsored by them.</div>
-</div>
+
+<section class="feature-strip" id="features">
+  <article><div class="feature-icon">▶</div><h3>Automatic Feeds</h3><p>New creator content delivered automatically to your Discord channels.</p></article>
+  <article><div class="feature-icon">◉</div><h3>Creator Watch</h3><p>Follow creators who aren't in your server and never miss their new content.</p></article>
+  <article><div class="feature-icon">●</div><h3>Smart Notifications</h3><p>Choose which roles or members get notified when new content arrives.</p></article>
+  <article><div class="feature-icon">⚙</div><h3>Easy Setup</h3><p>RoZAG creates and configures platform channels automatically.</p></article>
+  <article><div class="feature-icon">👥</div><h3>Multi-Server Support</h3><p>One creator can be followed by multiple communities independently.</p></article>
+</section>
+
+<section class="platform-share">
+  <div class="panel">
+    <h2>Supported Platforms</h2>
+    <div class="platform-grid">
+      <div class="platform active"><b class="yt">▶</b><span>YouTube<small>● Active</small></span></div>
+      <div class="platform active"><b class="tt">♪</b><span>TikTok<small>● Active</small></span></div>
+      <div class="platform active"><b class="tw">▣</b><span>Twitch<small>● Active</small></span></div>
+      <div class="platform soon"><b>Ｋ</b><span>Kick<small>Coming Soon</small></span></div>
+      <div class="platform soon"><b>◎</b><span>Instagram<small>Coming Soon</small></span></div>
+      <div class="platform soon"><b>𝕏</b><span>X / Twitter<small>Coming Soon</small></span></div>
+    </div>
+  </div>
+
+  <div class="panel share-panel">
+    <h2>Share RoZAG Social Hub</h2>
+    <div class="share-grid">
+      <button data-share="native" class="share discord">Discord</button>
+      <a data-share-link="x" class="share" target="_blank" rel="noopener">X / Twitter</a>
+      <a data-share-link="facebook" class="share" target="_blank" rel="noopener">Facebook</a>
+      <a data-share-link="reddit" class="share" target="_blank" rel="noopener">Reddit</a>
+      <a data-share-link="whatsapp" class="share" target="_blank" rel="noopener">WhatsApp</a>
+      <button data-share="copy" class="share">Copy Link</button>
+    </div>
+    <p class="share-note">Spread the word and help other communities discover RoZAG.</p>
+    <div id="share-message" class="share-message" role="status"></div>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div>
+    <div class="eyebrow">MADE FOR COMMUNITIES</div>
+    <h2>One place for the feeds your community actually follows.</h2>
+  </div>
+  <div class="about-copy">
+    <p>RoZAG Social Hub is an independent community project built around Discord. It helps servers connect authorized creator accounts, create the right platform channels, and deliver new public content without requiring every creator to be a Discord member.</p>
+    <p>Supported integrations and features can change as third-party platforms change their APIs and permissions.</p>
+  </div>
+</section>
+
+<section class="support-banner">
+  <div>
+    <div class="eyebrow">NEED A HAND?</div>
+    <h2>RoZAG Social Hub Support</h2>
+    <p>Get help with setup, social feeds, notifications, creator accounts or Discord channels.</p>
+  </div>
+  <a class="btn btn-secondary" href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Join Discord Support</a>
 </section>
 </main>
-<footer><div class="container">
-<strong>RoZAG Social Feed</strong><br>
-<span class="small">An independent community project. Not affiliated with TikTok, YouTube, Twitch, Discord, or their respective owners.</span>
-</div></footer>
+
+<footer>
+  <div class="footer-brand"><img src="assets/rozag-logo.png" alt=""><span>RoZAG Social Hub<br><small>© 2026 RoZAG. All rights reserved.</small></span></div>
+  <div class="footer-links">
+    <a href="terms.html">Terms of Service</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Discord Support</a>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
