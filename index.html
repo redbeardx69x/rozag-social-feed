@@ -8,11 +8,11 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="nav">
-  <div class="wrap nav-inner">
+<header class="topbar">
+  <div class="container nav">
     <a class="brand" href="#">
-      <span class="brand-mark">RZ</span>
-      <span><b>ROZAG</b> SOCIAL HUB</span>
+      <span class="brand-logo">ROZAG<br><small>☠</small></span>
+      <span>ROZAG SOCIAL HUB</span>
     </a>
     <nav>
       <a href="#features">Features</a>
@@ -20,114 +20,112 @@
       <a href="#status">Status</a>
       <a href="#terms">Terms</a>
       <a href="#privacy">Privacy</a>
-      <a class="support" href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">◈ Discord Support</a>
+      <a class="support" href="https://discord.gg/rJFUWAGWHH" target="_blank">Discord Support</a>
     </nav>
-    <a class="discord-btn" href="https://discord.com/" target="_blank" rel="noopener">◈ Add to Discord</a>
+    <a class="btn red" href="https://discord.com/" target="_blank">◈ Add to Discord</a>
   </div>
 </header>
 
 <main>
 <section class="hero" id="about">
-  <div class="wrap hero-grid">
+  <div class="hero-bg"></div>
+  <div class="container hero-grid">
     <div class="hero-copy">
       <div class="eyebrow">ONE CREW. ONE HUB. EVERY FEED.</div>
       <h1>Social feeds,<br><span>built for Discord.</span></h1>
       <p>
         RoZAG Social Hub connects your Discord community to creator feeds from
-        <strong>YouTube, TikTok and Twitch</strong> — automatically creating the
+        <strong>YouTube, TikTok and Twitch</strong> — automatically creating
         channels, handling authorizations and delivering new content where your
         community can see it.
       </p>
-      <p class="muted">
-        Creator Watch lets a server follow creators who are not Discord members.
-      </p>
+      <p>Creator Watch lets a server follow creators who are not Discord members.</p>
       <div class="actions">
-        <a class="discord-btn big" href="https://discord.com/" target="_blank" rel="noopener">◈ Add RoZAG to Discord</a>
-        <a class="ghost-btn" href="#features">Explore the Hub</a>
+        <a class="btn red big" href="https://discord.com/" target="_blank">◈ Add RoZAG to Discord</a>
+        <a class="btn outline big" href="#features">Explore the Hub <b>›</b></a>
       </div>
     </div>
 
     <aside class="status-card" id="status">
-      <div class="logo-art">
+      <div class="status-logo">
         <div class="crown">♛</div>
-        <div class="skull">☠</div>
-        <div class="rozag">ROZAG</div>
+        <div class="logo-word">ROZAG</div>
+        <div class="logo-skull">☠</div>
+        <div class="wings">╲╱ ╲╱</div>
       </div>
       <h2>RoZAG Social Hub</h2>
-      <div class="sub">Live service status</div>
+      <div class="subtitle">Live service status</div>
 
-      <div class="overall" id="overall"><i></i><span>Checking services…</span></div>
+      <div class="service-list">
+        <div class="service" data-service="discord">
+          <div class="service-icon discord">◈</div>
+          <div class="service-name">Discord Bot</div>
+          <div class="state"><i></i><span>Checking…</span></div>
+        </div>
+        <div class="service" data-service="youtube">
+          <div class="service-icon youtube">▶</div>
+          <div class="service-name">YouTube</div>
+          <div class="state"><i></i><span>Checking…</span></div>
+        </div>
+        <div class="service" data-service="tiktok">
+          <div class="service-icon tiktok">♪</div>
+          <div class="service-name">TikTok</div>
+          <div class="state"><i></i><span>Checking…</span></div>
+        </div>
+        <div class="service" data-service="twitch">
+          <div class="service-icon twitch">T</div>
+          <div class="service-name">Twitch</div>
+          <div class="state"><i></i><span>Checking…</span></div>
+        </div>
+      </div>
 
-      <div class="status-row" data-service="discord">
-        <div class="status-icon">◈</div>
-        <div><strong>Discord Bot</strong><small>Core service</small></div>
-        <div class="state"><i></i><span>Checking…</span></div>
-      </div>
-      <div class="status-row" data-service="youtube">
-        <div class="status-icon youtube">▶</div>
-        <div><strong>YouTube</strong><small>WebSub feed</small></div>
-        <div class="state"><i></i><span>Checking…</span></div>
-      </div>
-      <div class="status-row" data-service="tiktok">
-        <div class="status-icon tiktok">♪</div>
-        <div><strong>TikTok</strong><small>OAuth / feed</small></div>
-        <div class="state"><i></i><span>Checking…</span></div>
-      </div>
-      <div class="status-row" data-service="twitch">
-        <div class="status-icon twitch">T</div>
-        <div><strong>Twitch</strong><small>EventSub</small></div>
-        <div class="state"><i></i><span>Checking…</span></div>
-      </div>
-
-      <div class="mini-stats">
-        <div><b id="servers">—</b><small>Servers connected</small></div>
-        <div><b id="heartbeat">—</b><small>Last heartbeat</small></div>
-      </div>
-      <footer id="updated">Updated every 15 seconds</footer>
+      <div class="card-stat"><span>Servers connected</span><b id="servers">—</b></div>
+      <div class="card-stat"><span>Last heartbeat</span><b id="heartbeat">—</b></div>
+      <div class="updated" id="updated">Updated every 15 seconds</div>
     </aside>
   </div>
 </section>
 
-<section class="features" id="features">
-  <div class="wrap feature-grid">
-    <article><div class="ficon">▶</div><h3>Automatic Feeds</h3><p>New content from your favorite creators delivered automatically to your Discord channels.</p></article>
-    <article><div class="ficon">◉</div><h3>Creator Watch</h3><p>Follow creators who aren't in your server and never miss their new content.</p></article>
-    <article><div class="ficon">♢</div><h3>Smart Notifications</h3><p>Choose which roles get notified when new content arrives.</p></article>
-    <article><div class="ficon">⚙</div><h3>Easy Setup</h3><p>RoZAG creates and configures the platform channels for you automatically.</p></article>
-    <article><div class="ficon">♙</div><h3>Multi-Server Support</h3><p>One creator can be followed by multiple communities independently.</p></article>
+<section class="feature-strip" id="features">
+  <div class="container feature-grid">
+    <article><div class="feature-icon">ϟ</div><div><h3>Automatic Feeds</h3><p>New content appears instantly in your Discord channels.</p></div></article>
+    <article><div class="feature-icon">♟</div><div><h3>Creator Watch</h3><p>Follow creators who are not Discord members.</p></div></article>
+    <article><div class="feature-icon">●</div><div><h3>Smart Notifications</h3><p>Stay informed with reliable updates and alerts.</p></div></article>
+    <article><div class="feature-icon">⚙</div><div><h3>Easy Setup</h3><p>Simple authorization and configuration in minutes.</p></div></article>
+    <article><div class="feature-icon">▣</div><div><h3>Multi-Server Support</h3><p>Manage multiple servers and creators from one powerful hub.</p></div></article>
   </div>
 </section>
 
 <section class="platforms">
-  <div class="wrap">
-    <div class="section-head">
-      <span>ROZAG SOCIAL HUB</span>
-      <h2>ONE CREW. ONE HUB. ALL LEGENDS.</h2>
-      <p>Connect your community to every feed that matters.</p>
-    </div>
+  <div class="container">
+    <div class="section-title">SUPPORTED PLATFORMS</div>
     <div class="platform-grid">
-      <div class="platform youtube"><b>▶</b><h3>YOUTUBE</h3><strong>NEW UPLOADS</strong><p>Get notified when your favorite creators upload.</p></div>
-      <div class="platform tiktok"><b>♪</b><h3>TIKTOK</h3><strong>NEW VIDEOS</strong><p>Stay up to date with the latest short-form content.</p></div>
-      <div class="platform twitch"><b>T</b><h3>TWITCH</h3><strong>LIVE ALERTS</strong><p>Know when your favorite streamers go live.</p></div>
-      <div class="platform creator"><b>◉</b><h3>CREATOR WATCH</h3><strong>FOLLOW ANYONE</strong><p>Follow creators even if they're not in your server.</p></div>
-      <div class="platform notify"><b>♢</b><h3>SMART NOTIFICATIONS</h3><strong>YOUR WAY</strong><p>Choose roles, @everyone, @here or no mention.</p></div>
-      <div class="platform setup"><b>⚙</b><h3>EASY SETUP</h3><strong>HASSLE FREE</strong><p>Automatic channels, roles, guides and management.</p></div>
+      <div class="platform"><span class="picon youtube">▶</span><strong>YouTube</strong><em class="active">Active</em></div>
+      <div class="platform"><span class="picon tiktok">♪</span><strong>TikTok</strong><em class="active">Active</em></div>
+      <div class="platform"><span class="picon twitch">T</span><strong>Twitch</strong><em class="active">Active</em></div>
+      <div class="platform"><span class="picon kick">K</span><strong>Kick</strong><em class="soon">Coming Soon</em></div>
+      <div class="platform"><span class="picon instagram">◎</span><strong>Instagram</strong><em class="soon">Coming Soon</em></div>
+      <div class="platform"><span class="picon x">𝕏</span><strong>X</strong><em class="soon">Coming Soon</em></div>
     </div>
   </div>
 </section>
 
-<section class="cta" id="terms">
-  <div class="wrap cta-inner">
-    <div><span class="eyebrow">LEGENDS SUPPORT LEGENDS</span><h2>Built for communities, not just servers.</h2></div>
-    <a class="discord-btn big" href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Join RoZAG Support</a>
+<section class="bottom-cta" id="terms">
+  <div class="container cta-inner">
+    <div>
+      <div class="eyebrow">LEGENDS SUPPORT LEGENDS</div>
+      <h2>One crew. One hub. <span>Every feed.</span></h2>
+    </div>
+    <a class="btn red big" href="https://discord.gg/rJFUWAGWHH" target="_blank">Join Discord Support</a>
   </div>
 </section>
 </main>
 
 <footer class="footer" id="privacy">
-  <div class="wrap footer-inner">
-    <div><b>ROZAG SOCIAL HUB</b><span> CONTENT • COMMUNITY • CONNECTION</span></div>
-    <div>DISCORD.GG/<strong>RJFUWAGWHH</strong></div>
+  <div class="container footer-inner">
+    <div class="footer-brand"><span class="mini-logo">RZ</span> © 2026 <b>RoZAG</b> Social Hub. All rights reserved.</div>
+    <div>Made with <span class="heart">♥</span> for Discord communities.</div>
+    <div>ONE CREW. ONE HUB. <span>EVERY FEED.</span></div>
   </div>
 </footer>
 
