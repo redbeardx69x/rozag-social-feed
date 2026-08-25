@@ -2,121 +2,128 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="RoZAG Social Hub connects Discord communities to creator feeds from YouTube, TikTok and Twitch.">
-  <meta property="og:title" content="RoZAG Social Hub">
-  <meta property="og:description" content="Social feeds, built for Discord.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://redbeardx69x.github.io/rozag-social-feed/">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>RoZAG Social Hub</title>
-  <link rel="icon" href="assets/rozag-logo.png">
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="RoZAG Social Hub — social feeds built for Discord.">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="site-header">
-  <a class="brand" href="./" aria-label="RoZAG Social Hub home">
-    <img src="assets/rozag-logo.png" alt="RoZAG logo">
-    <span>ROZAG SOCIAL HUB</span>
-  </a>
-  <nav>
-    <a href="#features">Features</a>
-    <a href="#about">About</a>
-    <a href="#status">Status</a>
-    <a href="terms.html">Terms</a>
-    <a href="privacy.html">Privacy</a>
-    <a class="support-link" href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Discord Support</a>
-  </nav>
-  <a class="btn btn-primary top-cta" href="https://discord.com/oauth2/authorize?client_id=1537113386867761293&permissions=268445712&scope=bot%20applications.commands" target="_blank" rel="noopener">Add to Discord</a>
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#"><span>ROZAG</span> SOCIAL HUB</a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#status">Status</a>
+      <a href="#platforms">Platforms</a>
+      <a href="#support">Support</a>
+    </nav>
+    <a class="btn btn-red" href="https://discord.com/" target="_blank" rel="noopener">Add to Discord</a>
+  </div>
 </header>
 
 <main>
-<section class="hero">
-  <div class="hero-copy">
-    <div class="eyebrow">ONE CREW. ONE HUB. EVERY FEED.</div>
-    <h1>Social feeds,<br><span>built for Discord.</span></h1>
-    <p class="lead">RoZAG Social Hub connects your Discord community to creator feeds from YouTube, TikTok and Twitch — automatically creating channels, handling authorizations and delivering new content where your community can see it. Creator Watch lets a server follow creators who are not Discord members.</p>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="https://discord.com/oauth2/authorize?client_id=1537113386867761293&permissions=268445712&scope=bot%20applications.commands" target="_blank" rel="noopener">Add RoZAG to Discord</a>
-      <a class="btn btn-secondary" href="#features">Explore the Hub</a>
+<section class="hero" id="status">
+  <div class="container hero-grid">
+    <div>
+      <div class="kicker">ONE CREW. ONE HUB. EVERY FEED.</div>
+      <h1>Social feeds,<br><span>built for Discord.</span></h1>
+      <p class="lead">
+        RoZAG Social Hub connects your Discord community to creator feeds from
+        YouTube, TikTok and Twitch — automatically delivering new content where
+        your community can see it.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-red" href="https://discord.com/" target="_blank" rel="noopener">Add RoZAG to Discord</a>
+        <a class="btn" style="border:1px solid #343942;background:#15181e" href="#platforms">Explore the Hub</a>
+      </div>
     </div>
+
+    <aside class="status-card">
+      <div class="logo-mark">ROZAG</div>
+      <h2>RoZAG Social Hub</h2>
+      <div class="sub">Live service status</div>
+      <div id="overall-status" class="overall-status unknown">
+        <span class="service-dot unknown"></span>Checking…
+      </div>
+
+      <div class="service-list">
+        <div class="service" data-service="discord">
+          <div class="service-icon">D</div>
+          <div><div class="service-name">Discord Bot</div><div class="service-detail">Waiting for heartbeat</div></div>
+          <div class="service-right"><span class="service-dot unknown"></span><span class="service-state">Checking…</span></div>
+        </div>
+
+        <div class="service" data-service="youtube">
+          <div class="service-icon">▶</div>
+          <div><div class="service-name">YouTube</div><div class="service-detail">Platform health</div></div>
+          <div class="service-right"><span class="service-dot unknown"></span><span class="service-state">Checking…</span></div>
+        </div>
+
+        <div class="service" data-service="tiktok">
+          <div class="service-icon">♪</div>
+          <div><div class="service-name">TikTok</div><div class="service-detail">OAuth / feed health</div></div>
+          <div class="service-right"><span class="service-dot unknown"></span><span class="service-state">Checking…</span></div>
+        </div>
+
+        <div class="service" data-service="twitch">
+          <div class="service-icon">T</div>
+          <div><div class="service-name">Twitch</div><div class="service-detail">EventSub verification</div></div>
+          <div class="service-right"><span class="service-dot unknown"></span><span class="service-state">Checking…</span></div>
+        </div>
+
+        <div class="service" data-service="website">
+          <div class="service-icon">W</div>
+          <div><div class="service-name">Website</div><div class="service-detail">Public status page</div></div>
+          <div class="service-right"><span class="service-dot unknown"></span><span class="service-state">Checking…</span></div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><strong id="server-count">—</strong><span>Servers connected</span></div>
+        <div class="stat"><strong id="heartbeat">—</strong><span>Last bot heartbeat</span></div>
+      </div>
+
+      <footer id="status-updated">Updated every 15 seconds</footer>
+    </aside>
   </div>
-
-  <aside class="status-card" id="status" aria-live="polite">
-    <img class="status-logo" src="assets/rozag-logo.png" alt="">
-    <h2>RoZAG Social Hub</h2>
-    <p class="status-subtitle">Live service status</p>
-    <div class="status-row"><span>Discord Bot</span><strong id="bot-status"><i class="dot dot-amber"></i> Checking</strong></div>
-    <div class="status-row"><span>Servers connected</span><strong id="server-count">—</strong></div>
-    <div class="status-row"><span>Last heartbeat</span><strong id="heartbeat">—</strong></div>
-    <div class="status-updated" id="status-updated">Checking service…</div>
-  </aside>
 </section>
 
-<section class="feature-strip" id="features">
-  <article><div class="feature-icon">▶</div><h3>Automatic Feeds</h3><p>New creator content delivered automatically to your Discord channels.</p></article>
-  <article><div class="feature-icon">◉</div><h3>Creator Watch</h3><p>Follow creators who aren't in your server and never miss their new content.</p></article>
-  <article><div class="feature-icon">●</div><h3>Smart Notifications</h3><p>Choose which roles or members get notified when new content arrives.</p></article>
-  <article><div class="feature-icon">⚙</div><h3>Easy Setup</h3><p>RoZAG creates and configures platform channels automatically.</p></article>
-  <article><div class="feature-icon">👥</div><h3>Multi-Server Support</h3><p>One creator can be followed by multiple communities independently.</p></article>
+<section class="features" id="features">
+  <div class="container feature-grid">
+    <div class="feature"><div class="icon">▶</div><h3>Automatic Feeds</h3><p>New creator content delivered automatically to Discord.</p></div>
+    <div class="feature"><div class="icon">◉</div><h3>Creator Watch</h3><p>Follow creators who are not Discord members.</p></div>
+    <div class="feature"><div class="icon">!</div><h3>Smart Notifications</h3><p>Choose which roles receive new-content notifications.</p></div>
+    <div class="feature"><div class="icon">⚙</div><h3>Easy Setup</h3><p>RoZAG creates and configures platform channels automatically.</p></div>
+    <div class="feature"><div class="icon">◆</div><h3>Multi-Server</h3><p>One creator can be followed by multiple communities.</p></div>
+  </div>
 </section>
 
-<section class="platform-share">
-  <div class="panel">
-    <h2>Supported Platforms</h2>
+<section class="platforms" id="platforms">
+  <div class="container">
+    <div class="section-kicker">Supported platforms</div>
+    <h2>Every feed. One hub.</h2>
     <div class="platform-grid">
-      <div class="platform active"><b class="yt">▶</b><span>YouTube<small>● Active</small></span></div>
-      <div class="platform active"><b class="tt">♪</b><span>TikTok<small>● Active</small></span></div>
-      <div class="platform active"><b class="tw">▣</b><span>Twitch<small>● Active</small></span></div>
-      <div class="platform soon"><b>Ｋ</b><span>Kick<small>Coming Soon</small></span></div>
-      <div class="platform soon"><b>◎</b><span>Instagram<small>Coming Soon</small></span></div>
-      <div class="platform soon"><b>𝕏</b><span>X / Twitter<small>Coming Soon</small></span></div>
+      <div class="platform-card"><div class="picon">▶</div><div><strong>YouTube</strong><small>WebSub / creator feeds</small></div></div>
+      <div class="platform-card"><div class="picon">♪</div><div><strong>TikTok</strong><small>OAuth / creator feeds</small></div></div>
+      <div class="platform-card"><div class="picon">T</div><div><strong>Twitch</strong><small>EventSub / stream.online</small></div></div>
     </div>
-  </div>
-
-  <div class="panel share-panel">
-    <h2>Share RoZAG Social Hub</h2>
-    <div class="share-grid">
-      <button data-share="native" class="share discord">Discord</button>
-      <a data-share-link="x" class="share" target="_blank" rel="noopener">X / Twitter</a>
-      <a data-share-link="facebook" class="share" target="_blank" rel="noopener">Facebook</a>
-      <a data-share-link="reddit" class="share" target="_blank" rel="noopener">Reddit</a>
-      <a data-share-link="whatsapp" class="share" target="_blank" rel="noopener">WhatsApp</a>
-      <button data-share="copy" class="share">Copy Link</button>
-    </div>
-    <p class="share-note">Spread the word and help other communities discover RoZAG.</p>
-    <div id="share-message" class="share-message" role="status"></div>
   </div>
 </section>
 
-<section class="about" id="about">
-  <div>
-    <div class="eyebrow">MADE FOR COMMUNITIES</div>
-    <h2>One place for the feeds your community actually follows.</h2>
+<section class="share" id="support">
+  <div class="container">
+    <strong>Share RoZAG Social Hub</strong>
+    <div class="share-buttons">
+      <a data-share-link="facebook" href="#">Facebook</a>
+      <a data-share-link="x" href="#">X / Twitter</a>
+      <a data-share-link="reddit" href="#">Reddit</a>
+      <a data-share-link="whatsapp" href="#">WhatsApp</a>
+      <button data-share="copy" type="button">Copy Link</button>
+    </div>
+    <div id="share-message"></div>
   </div>
-  <div class="about-copy">
-    <p>RoZAG Social Hub is an independent community project built around Discord. It helps servers connect authorized creator accounts, create the right platform channels, and deliver new public content without requiring every creator to be a Discord member.</p>
-    <p>Supported integrations and features can change as third-party platforms change their APIs and permissions.</p>
-  </div>
-</section>
-
-<section class="support-banner">
-  <div>
-    <div class="eyebrow">NEED A HAND?</div>
-    <h2>RoZAG Social Hub Support</h2>
-    <p>Get help with setup, social feeds, notifications, creator accounts or Discord channels.</p>
-  </div>
-  <a class="btn btn-secondary" href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Join Discord Support</a>
 </section>
 </main>
-
-<footer>
-  <div class="footer-brand"><img src="assets/rozag-logo.png" alt=""><span>RoZAG Social Hub<br><small>© 2026 RoZAG. All rights reserved.</small></span></div>
-  <div class="footer-links">
-    <a href="terms.html">Terms of Service</a>
-    <a href="privacy.html">Privacy Policy</a>
-    <a href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener">Discord Support</a>
-  </div>
-</footer>
 
 <script src="config.js"></script>
 <script src="app.js"></script>
