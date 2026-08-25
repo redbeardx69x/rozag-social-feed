@@ -1,33 +1,28 @@
-RoZAG Social Hub — reference-style website
+RoZAG Social Hub - FIXED REFERENCE DESIGN
 
-This version intentionally restores the supplied reference image as the visual
-baseline.
+This package restores the supplied reference screenshot as the visual baseline.
 
-The large status card ONLY shows:
+The large status card contains ONLY:
 - Discord Bot
 - Servers connected
 - Last heartbeat
 
-YouTube/TikTok/Twitch are represented in the Supported Platforms section below
-the hero, so the hero remains visually clean like the reference.
+Platform health stays below the hero:
+- YouTube: Active
+- TikTok: Active
+- Twitch: Error
+- Kick: Coming Soon
+- Instagram: Coming Soon
+- X: Coming Soon
 
-Upload:
+Files:
   index.html
   style.css
   app.js
-  assets/
+  assets/rozag-header.jpg
+  assets/rozag-card.jpg
 
-to:
+Upload all of these to:
   /home/coolvets/domains/rozag.coolvetspaces.com/public_html/website/
 
-The page reads Discord bot status from:
-  /api/status
-
-The platform cards currently display the known states:
-  YouTube: Active
-  TikTok: Active
-  Twitch: Error
-  Kick/Instagram/X: Coming Soon
-
-When the backend exposes live platform status, those cards can be wired to it
-without changing the reference layout.
+The status card reads the Discord bot status from /api/status.
