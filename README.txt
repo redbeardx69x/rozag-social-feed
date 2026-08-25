@@ -1,44 +1,44 @@
-RoZAG Social Hub — EXACT STYLE RECREATION
-=============================================
+RoZAG Social Hub website - corrected frontend
+===============================================
 
-This version was recreated from the supplied RoZAG reference image.
-
-It intentionally keeps the reference layout:
-- 88px black navigation bar
-- RoZAG logo at left
-- centered navigation
-- red Add to Discord button
-- large two-line hero on the left
-- red/orange eyebrow
-- large dark rounded status card on the right
-- RoZAG logo artwork inside the status card
-- four service rows
-- server count and heartbeat rows
-- lower feature strip
-- supported platform strip
-- dark footer
-
-The supplied reference logos are included in assets/.
-
-Upload:
+Files:
   index.html
-  styles.css
+  style.css
   app.js
-  config.js
-  assets/
 
-to:
-  /home/coolvets/domains/rozag.coolvetspaces.com/public_html/website/
+Deployment:
+  Copy these files into:
+    /home/coolvets/domains/rozag.coolvetspaces.com/public_html/website/
 
-Status endpoint:
-  https://rozag.coolvetspaces.com/api/status
+The frontend polls:
+  /api/status
+every 15 seconds.
 
-The frontend does not fabricate YouTube/TikTok/Twitch status.
-Those become live once the backend returns:
+Expected modern gateway payload:
 {
+  "online": true,
+  "servers": 4,
+  "last_seen_human": "just now",
   "services": {
     "youtube": {"status":"online"},
     "tiktok": {"status":"online"},
-    "twitch": {"status":"error"}
+    "twitch": {"status":"error", "detail":"EventSub verification failed"}
   }
 }
+
+Compatibility:
+If the current gateway does not yet expose services, the page uses the current
+known state as a temporary fallback:
+  YouTube = Active
+  TikTok  = Active
+  Twitch  = Error
+
+Once the gateway exposes services, those live values take priority automatically.
+
+This version intentionally keeps the service statuses OUT of the large hero
+status card. The card only contains:
+  Discord Bot
+  Servers connected
+  Last heartbeat
+
+The supported-platform cards are where YouTube/TikTok/Twitch health is shown.
