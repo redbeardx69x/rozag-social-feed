@@ -1,140 +1,117 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RoZAG Social Hub</title>
-  <meta name="description" content="RoZAG Social Hub — social feeds built for Discord.">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RoZAG Social Hub</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header">
+
+<header class="header">
+  <div class="nav">
     <a class="brand" href="/">
-      <div class="brand-logo">ROZAG<span>☠</span></div>
+      <img src="assets/rozag-header.jpg" alt="RoZAG">
       <span>ROZAG SOCIAL HUB</span>
     </a>
 
-    <nav class="nav">
+    <div class="links">
       <a href="#features">Features</a>
       <a href="#about">About</a>
       <a href="#status">Status</a>
-      <a href="/terms">Terms</a>
-      <a href="/privacy">Privacy</a>
+      <a href="#terms">Terms</a>
+      <a href="#privacy">Privacy</a>
       <a class="support" href="https://discord.com/" target="_blank" rel="noopener">Discord Support</a>
-    </nav>
+    </div>
 
-    <a class="discord-button" href="https://discord.com/oauth2/authorize" target="_blank" rel="noopener">
-      Add to Discord
-    </a>
-  </header>
+    <a class="top-button" href="https://discord.com/oauth2/authorize" target="_blank" rel="noopener">Add to Discord</a>
+  </div>
+</header>
 
-  <main>
-    <section class="hero" id="about">
-      <div class="hero-copy">
-        <div class="eyebrow">ONE CREW. ONE HUB. EVERY FEED.</div>
+<main>
+<section class="hero" id="about">
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <div class="eyebrow">ONE CREW. ONE HUB. EVERY FEED.</div>
 
-        <h1>
-          <span>Social feeds,</span>
-          <strong>built for</strong>
-          <strong>Discord.</strong>
-        </h1>
+      <h1>
+        <span>Social feeds,</span>
+        <b>built for</b>
+        <b>Discord.</b>
+      </h1>
 
-        <p>
-          RoZAG Social Hub connects your Discord community to creator feeds from
-          <b>YouTube</b>, <b>TikTok</b> and <b>Twitch</b> — automatically creating
-          channels, handling authorizations and delivering new content where your
-          community can see it.
-        </p>
+      <p>
+        RoZAG Social Hub connects your Discord community to creator feeds from
+        <strong>YouTube, TikTok and Twitch</strong> — automatically creating channels,
+        handling authorizations and delivering new content where your community can see it.
+      </p>
 
-        <p>Creator Watch lets a server follow creators who are not Discord members.</p>
+      <p>Creator Watch lets a server follow creators who are not Discord members.</p>
 
-        <div class="hero-actions">
-          <a class="primary-button" href="https://discord.com/oauth2/authorize" target="_blank" rel="noopener">
-            Add RoZAG to Discord
-          </a>
-          <a class="secondary-button" href="#features">Explore the Hub</a>
-        </div>
+      <div class="buttons">
+        <a class="primary" href="https://discord.com/oauth2/authorize" target="_blank" rel="noopener">Add RoZAG to Discord</a>
+        <a class="secondary" href="#features">Explore the Hub</a>
+      </div>
+    </div>
+
+    <aside class="status-card" id="status">
+      <div class="card-logo-wrap">
+        <img src="assets/rozag-card.jpg" alt="RoZAG">
       </div>
 
-      <aside class="status-card" id="status">
-        <div class="status-logo" aria-label="RoZAG logo">
-          <div class="card-logo">ROZAG<span>☠</span></div>
-        </div>
+      <h2>RoZAG Social Hub</h2>
+      <div class="card-subtitle">Live service status</div>
 
-        <h2>RoZAG Social Hub</h2>
-        <p class="status-subtitle">Live service status</p>
+      <div class="card-line"></div>
 
-        <div class="status-divider"></div>
-
-        <div class="status-row">
-          <span>Discord Bot</span>
-          <span class="status-value"><i id="bot-dot" class="dot"></i><b id="bot-state">Checking...</b></span>
-        </div>
-
-        <div class="status-row">
-          <span>Servers connected</span>
-          <b id="server-count">—</b>
-        </div>
-
-        <div class="status-row">
-          <span>Last heartbeat</span>
-          <b id="heartbeat">—</b>
-        </div>
-
-        <div class="updated" id="updated">Checking status…</div>
-      </aside>
-    </section>
-
-    <section class="platforms" id="features">
-      <div class="section-heading">
-        <span>SUPPORTED PLATFORMS</span>
+      <div class="main-status">
+        <span>Discord Bot</span>
+        <span class="online"><i></i><b id="bot-state">Online</b></span>
       </div>
 
-      <div class="platform-grid">
-        <article class="platform-card" data-service="youtube">
-          <div class="platform-icon youtube-icon">▶</div>
-          <div class="platform-name">YouTube</div>
-          <div class="platform-state"><i class="platform-dot"></i><span>Checking…</span></div>
-        </article>
-
-        <article class="platform-card" data-service="tiktok">
-          <div class="platform-icon tiktok-icon">♪</div>
-          <div class="platform-name">TikTok</div>
-          <div class="platform-state"><i class="platform-dot"></i><span>Checking…</span></div>
-        </article>
-
-        <article class="platform-card" data-service="twitch">
-          <div class="platform-icon twitch-icon">T</div>
-          <div class="platform-name">Twitch</div>
-          <div class="platform-state"><i class="platform-dot"></i><span>Checking…</span></div>
-        </article>
-
-        <article class="platform-card" data-service="kick">
-          <div class="platform-icon">K</div>
-          <div class="platform-name">Kick</div>
-          <div class="platform-state coming-soon"><span>Coming Soon</span></div>
-        </article>
-
-        <article class="platform-card" data-service="instagram">
-          <div class="platform-icon">◎</div>
-          <div class="platform-name">Instagram</div>
-          <div class="platform-state coming-soon"><span>Coming Soon</span></div>
-        </article>
-
-        <article class="platform-card" data-service="x">
-          <div class="platform-icon">𝕏</div>
-          <div class="platform-name">X</div>
-          <div class="platform-state coming-soon"><span>Coming Soon</span></div>
-        </article>
+      <div class="main-status">
+        <span>Servers connected</span>
+        <b id="server-count">—</b>
       </div>
-    </section>
-  </main>
 
-  <footer>
-    <span>© RoZAG Social Hub</span>
-    <span>One crew. One hub. Every feed.</span>
-  </footer>
+      <div class="main-status">
+        <span>Last heartbeat</span>
+        <b id="heartbeat">—</b>
+      </div>
 
-  <script src="app.js"></script>
+      <div class="card-updated" id="updated">Updated just now</div>
+    </aside>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="feature-grid">
+    <article><div class="icon">ϟ</div><div><h3>Automatic Feeds</h3><p>New content appears instantly in your Discord channels.</p></div></article>
+    <article><div class="icon">♟</div><div><h3>Creator Watch</h3><p>Follow creators who are not Discord members.</p></div></article>
+    <article><div class="icon">●</div><div><h3>Smart Notifications</h3><p>Stay informed with reliable updates and alerts.</p></div></article>
+    <article><div class="icon">⚙</div><div><h3>Easy Setup</h3><p>Simple authorization and configuration in minutes.</p></div></article>
+    <article><div class="icon">▣</div><div><h3>Multi-Server Support</h3><p>Manage multiple servers and creators from one hub.</p></div></article>
+  </div>
+</section>
+
+<section class="platforms">
+  <div class="platform-title">SUPPORTED PLATFORMS</div>
+  <div class="platform-grid">
+    <div class="platform" data-service="youtube"><strong>▶</strong><span>YouTube</span><em>Active</em></div>
+    <div class="platform" data-service="tiktok"><strong>♪</strong><span>TikTok</span><em>Active</em></div>
+    <div class="platform" data-service="twitch"><strong>T</strong><span>Twitch</span><em>Error</em></div>
+    <div class="platform"><strong>K</strong><span>Kick</span><small>Coming Soon</small></div>
+    <div class="platform"><strong>◎</strong><span>Instagram</span><small>Coming Soon</small></div>
+    <div class="platform"><strong>𝕏</strong><span>X</span><small>Coming Soon</small></div>
+  </div>
+</section>
+</main>
+
+<footer id="privacy">
+  <span>© 2026 RoZAG Social Hub. All rights reserved.</span>
+  <span>ONE CREW. ONE HUB. <b>EVERY FEED.</b></span>
+</footer>
+
+<script src="app.js"></script>
 </body>
 </html>

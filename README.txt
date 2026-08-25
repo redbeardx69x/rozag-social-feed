@@ -1,44 +1,33 @@
-RoZAG Social Hub website - corrected frontend
-===============================================
+RoZAG Social Hub — reference-style website
 
-Files:
+This version intentionally restores the supplied reference image as the visual
+baseline.
+
+The large status card ONLY shows:
+- Discord Bot
+- Servers connected
+- Last heartbeat
+
+YouTube/TikTok/Twitch are represented in the Supported Platforms section below
+the hero, so the hero remains visually clean like the reference.
+
+Upload:
   index.html
   style.css
   app.js
+  assets/
 
-Deployment:
-  Copy these files into:
-    /home/coolvets/domains/rozag.coolvetspaces.com/public_html/website/
+to:
+  /home/coolvets/domains/rozag.coolvetspaces.com/public_html/website/
 
-The frontend polls:
+The page reads Discord bot status from:
   /api/status
-every 15 seconds.
 
-Expected modern gateway payload:
-{
-  "online": true,
-  "servers": 4,
-  "last_seen_human": "just now",
-  "services": {
-    "youtube": {"status":"online"},
-    "tiktok": {"status":"online"},
-    "twitch": {"status":"error", "detail":"EventSub verification failed"}
-  }
-}
+The platform cards currently display the known states:
+  YouTube: Active
+  TikTok: Active
+  Twitch: Error
+  Kick/Instagram/X: Coming Soon
 
-Compatibility:
-If the current gateway does not yet expose services, the page uses the current
-known state as a temporary fallback:
-  YouTube = Active
-  TikTok  = Active
-  Twitch  = Error
-
-Once the gateway exposes services, those live values take priority automatically.
-
-This version intentionally keeps the service statuses OUT of the large hero
-status card. The card only contains:
-  Discord Bot
-  Servers connected
-  Last heartbeat
-
-The supported-platform cards are where YouTube/TikTok/Twitch health is shown.
+When the backend exposes live platform status, those cards can be wired to it
+without changing the reference layout.
