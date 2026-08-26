@@ -1,30 +1,18 @@
-RoZAG Social Hub website package
-==================================
+ROZAG SOCIAL HUB — GITHUB PAGES DEPLOYMENT
+===============================================
 
-Upload all files in this folder to the website root:
+Repository:
+  redbeardx69x.github.io/rozag-social-feed/
 
-index.html
-about.html
-contact.html
-terms.html
-privacy.html
-app.js
-config.js
-styles.css
-favicon.ico
-rozag-logo.png
+Upload ALL files in this package to the repository root.
 
-The pages are linked to one another and all Discord install/support buttons
-open in a new tab.
+Important fixes in this version:
+- All website assets use relative paths (./styles.css, ./app.js, etc.).
+- Internal page links use explicit .html files, which works on GitHub Pages.
+- config.js now exports window.ROZAG_CONFIG correctly.
+- The frontend status API points to:
+    https://rozag.coolvetspaces.com/api/status
+- Discord install and support links open in a new tab.
+- favicon.ico and rozag-logo.png are included.
 
-Configuration:
-- API: https://rozag.coolvetspaces.com/api/status
-- Discord install: production RoZAG application invite
-- Support: https://discord.gg/DhbnqFHH
-
-IMPORTANT BACKEND NOTE:
-The public gateway must serve the website's static files (including
-styles.css, app.js, config.js and favicon.ico) if the gateway is also the
-web host. The gateway status endpoint must remain available at /api/status.
-The current gateway code already exposes the richer status payload fields
-used by this website.
+The GitHub Pages frontend does NOT contain platform credentials or secrets.
