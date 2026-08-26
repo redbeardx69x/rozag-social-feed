@@ -8,77 +8,128 @@
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 85% 0,#4a1018 0,transparent 34%),linear-gradient(180deg,#08090d,#050609);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}a{color:inherit;text-decoration:none}.wrap{width:min(1120px,92%);margin:auto}
 nav{position:sticky;top:0;z-index:5;background:#08090ddd;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.05em}.brand img{width:44px;height:44px;border-radius:50%;object-fit:cover}.navlinks{display:flex;gap:20px;color:#c7cad2;font-size:14px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:10px;border:1px solid #474d59;background:#191c24;font-weight:800}.primary{background:linear-gradient(135deg,var(--red),#9d1020);border-color:#ff4b55;box-shadow:0 12px 34px #d51a3030}
 .hero{padding:88px 0 74px}.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:58px;align-items:center}.kicker{color:var(--gold);font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.hero h1{font-size:clamp(46px,7vw,78px);line-height:.95;letter-spacing:-.05em;margin:16px 0 22px}.hero h1 span{color:var(--red2)}.lead{font-size:19px;line-height:1.7;color:#c7cad2;max-width:720px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
-.status{background:linear-gradient(160deg,#181b24,#0d1015);border:1px solid #303541;border-radius:22px;padding:26px;box-shadow:0 24px 80px #0009}.logo{width:175px;height:175px;display:block;object-fit:contain;border-radius:50%;margin:0 auto 20px}.status h2{text-align:center;margin:0}.status p{text-align:center;color:var(--muted);margin:6px 0 20px}.row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line)}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 14px #3bd98b}.dot.off{background:#777;box-shadow:none}.status strong{white-space:nowrap}.status small{font-size:12px}.platform-status{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:28px 0 34px}.platform-status .status-item{background:linear-gradient(180deg,#10131a,#0b0d12);border:1px solid #303541;border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px}.platform-status .status-item span:first-child{font-weight:700}.platform-status .status-value{font-weight:900;white-space:nowrap}.platform-status .status-value .dot{margin-right:8px}.status-heading{margin:0 0 12px;color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}@media(max-width:820px){.platform-status{grid-template-columns:1fr}}
+.status{background:linear-gradient(160deg,#181b24,#0d1015);border:1px solid #303541;border-radius:22px;padding:26px;box-shadow:0 24px 80px #0009}.logo{width:175px;height:175px;display:block;object-fit:contain;border-radius:50%;margin:0 auto 20px}.status h2{text-align:center;margin:0}.status p{text-align:center;color:var(--muted);margin:6px 0 20px}.row{display:flex;justify-content:space-between;gap:20px;padding:14px 0;border-top:1px solid var(--line)}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 14px #3bd98b}.dot.off{background:#777;box-shadow:none}
 section{padding:72px 0}.title{font-size:34px;margin:0 0 10px}.sub{color:var(--muted);line-height:1.7;max-width:760px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}.card,.panel{background:linear-gradient(180deg,#141720,#0d1015);border:1px solid var(--line);border-radius:18px;padding:26px}.card .ico{font-size:30px;margin-bottom:14px}.card h3{margin:0 0 8px}.card p{color:var(--muted);line-height:1.65;margin:0}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel ul{color:#c8cbd3;line-height:1.9}.panel code{background:#1d212b;padding:2px 6px;border-radius:5px}footer{border-top:1px solid var(--line);padding:30px 0;color:#858b96}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.links{display:flex;gap:18px}
 @media(max-width:820px){.grid,.two{grid-template-columns:1fr}.cards{grid-template-columns:1fr}.navlinks{display:none}}
+
+.status-platforms{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.platform-status{background:linear-gradient(160deg,#151923,#0c0f14);border:1px solid var(--line);border-radius:16px;padding:20px}
+.platform-status .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.platform-status h3{margin:0;font-size:18px}
+.platform-status .state{font-weight:900;display:inline-flex;align-items:center;gap:7px}
+.platform-status .state .dot{margin-right:0}
+.platform-status .detail{margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+.dot.warn{background:var(--gold);box-shadow:0 0 14px #f2b63d}
+.dot.red{background:#e21d2e;box-shadow:0 0 14px #e21d2e}
+.live-note{font-size:12px;color:var(--muted);margin-top:12px}
+@media(max-width:820px){.status-platforms{grid-template-columns:1fr}}
 </style></head>
 <body>
-<nav><div class="wrap nav"><a class="brand" href="#"><img src="rozag-logo.png" alt="RoZAG"><span>ROZAG SOCIAL HUB</span></a><div class="navlinks"><a href="#features">Features</a><a href="#about">About</a><a href="#status">Status</a><a href="terms.html" target="_blank" rel="noopener noreferrer">Terms</a><a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy</a></div><a id="install" class="btn primary" href="#">Add to Discord</a></div></nav>
-<header class="hero"><div class="wrap grid"><div><div class="kicker">One crew. One hub. Every feed.</div><h1>Social feeds,<br><span>built for Discord.</span></h1><p class="lead">RoZAG Social Hub connects your Discord community to creator feeds from YouTube, TikTok and Twitch — automatically creating the channels, handling authorizations and delivering new content where your community can see it. Creator Watch lets a server follow creators who are not Discord members.</p><div class="actions"><a id="install2" class="btn primary" href="#">Add RoZAG to Discord</a><a class="btn" href="#features">Explore the Hub</a></div></div>
+<nav><div class="wrap nav"><a class="brand" href="#"><img src="rozag-logo.png" alt="RoZAG"><span>ROZAG SOCIAL HUB</span></a><div class="navlinks"><a href="#features">Features</a><a href="#about">About</a><a href="#status">Status</a><a href="/terms" target="_blank" rel="noopener noreferrer">Terms</a><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy</a></div><a id="install" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Add to Discord</a></div></nav>
+<header class="hero"><div class="wrap grid"><div><div class="kicker">One crew. One hub. Every feed.</div><h1>Social feeds,<br><span>built for Discord.</span></h1><p class="lead">RoZAG Social Hub connects your Discord community to creator feeds from YouTube, TikTok and Twitch — automatically creating the channels, handling authorizations and delivering new content where your community can see it. Creator Watch lets a server follow creators who are not Discord members.</p><div class="actions"><a id="install2" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Add RoZAG to Discord</a><a class="btn" href="#features">Explore the Hub</a></div></div>
 <div class="status" id="status">
 <img class="logo" src="rozag-logo.png" alt="RoZAG Social Hub">
-<h2>RoZAG Social Hub</h2><p>Live service status</p>
-<div class="row"><span>Discord Bot</span><strong id="bot"><span class="dot off"></span>Checking…</strong></div>
+<h2>RoZAG Social Hub</h2>
+<p>Live platform status</p>
+<div class="row"><span>Discord Bot</span><strong id="bot">Checking…</strong></div>
 <div class="row"><span>Servers connected</span><strong id="servers">—</strong></div>
 <div class="row"><span>Last heartbeat</span><strong id="seen">—</strong></div>
-<small id="status-note" style="display:block;text-align:center;color:var(--muted);margin-top:18px">Updated automatically</small>
+<div class="live-note">Platform status updates automatically.</div>
 </div></div></header>
-<section id="features"><div class="wrap"><h2 class="title">Everything in one Social Hub</h2><p class="sub">A single Discord app for community social-feed automation.</p><div class="status-heading">Live platform status</div><div class="platform-status"><div class="status-item"><span>YouTube</span><strong class="status-value" id="youtube"><span class="dot off"></span>Not reported</strong></div><div class="status-item"><span>TikTok</span><strong class="status-value" id="tiktok"><span class="dot off"></span>Not reported</strong></div><div class="status-item"><span>Twitch</span><strong class="status-value" id="twitch"><span class="dot off"></span>Not reported</strong></div></div><div class="cards"><article class="card"><div class="ico">🎬</div><h3>YouTube <small>ACTIVE</small></h3><p>Monitor registered channels and deliver new uploads into dedicated Discord feeds.</p></article><article class="card"><div class="ico">🎵</div><h3>TikTok <small>ACTIVE</small></h3><p>Creators authorize through TikTok's official OAuth flow, then new public videos are delivered to Discord.</p></article><article class="card"><div class="ico">📺</div><h3>Twitch <small>ACTIVE</small></h3><p>Connect creators and receive live-event notifications through Twitch EventSub.</p></article><article class="card"><div class="ico">🟢</div><h3>Kick <small>COMING SOON</small></h3><p>Kick integration is planned and will be activated when ready.</p></article><article class="card"><div class="ico">📸</div><h3>Instagram <small>COMING SOON</small></h3><p>Instagram integration is planned for a future RoZAG release.</p></article><article class="card"><div class="ico">𝕏</div><h3>X / Twitter <small>COMING SOON</small></h3><p>X integration is planned for a future RoZAG release.</p></article></div></div></section>
-<section id="about"><div class="wrap two"><div class="panel"><h2 class="title">Made for RoZAG</h2><p class="sub">RoZAG Social Hub is a multi-server Discord application for creator-feed automation.</p><ul><li>Automatic Social Hub setup</li><li>Slash-command management</li><li>Creator-to-Discord member linking</li><li>Private TikTok authorization DMs</li><li>Per-server feed delivery</li><li>Creator Watch — follow external creators without requiring Discord membership</li><li>Platform roadmap with Coming Soon integrations</li></ul></div><div class="panel"><h2 class="title">Simple administration</h2><p class="sub">Server admins manage the system directly from Discord.</p><ul><li><code>/setup_social_hub</code> — create or repair the hub</li><li><code>/social add</code> — add a creator</li><li><code>/social list</code> — view connected accounts</li><li><code>/social remove</code> — remove an account</li></ul></div></div></section>
-<footer><div class="wrap foot"><span>© 2026 RoZAG Social Hub</span><span class="links"><a href="terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a><a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a><a href="https://discord.gg/DhbnqFHH" target="_blank" rel="noopener noreferrer">RoZAG Discord Support</a></span></div><div style="margin-top:10px">Contact: <a href="mailto:Rozag@coolvetspaces.com">Rozag@coolvetspaces.com</a></div></footer>
+
+
+<section id="platform-status"><div class="wrap">
+<h2 class="title">Live platform status</h2>
+<p class="sub">RoZAG reports each integration independently instead of showing a misleading single “online” state.</p>
+<div class="status-platforms">
+<article class="platform-status"><div class="top"><h3>🎬 YouTube</h3><strong class="state" id="youtube-status"><span class="dot off"></span>Checking…</strong></div><p class="detail" id="youtube-detail">Checking WebSub service…</p></article>
+<article class="platform-status"><div class="top"><h3>🎵 TikTok</h3><strong class="state" id="tiktok-status"><span class="dot off"></span>Checking…</strong></div><p class="detail" id="tiktok-detail">Checking OAuth and polling service…</p></article>
+<article class="platform-status"><div class="top"><h3>📺 Twitch</h3><strong class="state" id="twitch-status"><span class="dot off"></span>Checking…</strong></div><p class="detail" id="twitch-detail">Checking EventSub and polling service…</p></article>
+</div>
+</div></section>
+
+<section id="features"><div class="wrap"><h2 class="title">Everything in one Social Hub</h2><p class="sub">A single Discord app for community social-feed automation.</p><div class="cards"><article class="card"><div class="ico">🎬</div><h3>YouTube <small>ACTIVE</small></h3><p>Monitor registered YouTube channels and deliver new uploads automatically into each server's YouTube feed.</p></article><article class="card"><div class="ico">🎵</div><h3>TikTok <small>ACTIVE</small></h3><p>Creators authorize through TikTok's official OAuth flow, then RoZAG polls for new public videos and delivers them to Discord.</p></article><article class="card"><div class="ico">📺</div><h3>Twitch <small>ACTIVE</small></h3><p>Connect creators and receive live alerts through Twitch EventSub, with a 60-second polling safety net for delivery.</p></article><article class="card"><div class="ico">🟢</div><h3>Kick <small>COMING SOON</small></h3><p>Kick integration is planned and will be activated when ready.</p></article><article class="card"><div class="ico">📸</div><h3>Instagram <small>COMING SOON</small></h3><p>Instagram integration is planned for a future RoZAG release.</p></article><article class="card"><div class="ico">𝕏</div><h3>X / Twitter <small>COMING SOON</small></h3><p>X integration is planned for a future RoZAG release.</p></article></div></div></section>
+<section id="about"><div class="wrap two">
+<div class="panel">
+<h2 class="title">Made for RoZAG</h2>
+<p class="sub">RoZAG Social Hub is a multi-server Discord application built to automate creator feeds without making server admins manage separate platform bots.</p>
+<ul>
+<li>Automatic Social Hub and platform-channel setup</li>
+<li>YouTube, TikTok and Twitch feeds in one Discord app</li>
+<li>Creator Watch for creators who are not Discord members</li>
+<li>Per-server feed delivery and independent creator connections</li>
+<li>TikTok authorization through the official OAuth flow</li>
+<li>Twitch live detection with EventSub plus a 60-second delivery safety net</li>
+<li>Instagram, Kick and X / Twitter planned as future integrations</li>
+</ul>
+</div>
+<div class="panel">
+<h2 class="title">Simple administration</h2>
+<p class="sub">Server admins manage the Social Hub directly from Discord. RoZAG handles the platform-side plumbing in the background.</p>
+<ul>
+<li><code>/setup_social_hub</code> — create or repair the Social Hub</li>
+<li><code>/social add</code> — add a YouTube, TikTok or Twitch creator</li>
+<li><code>/social list</code> — view connected accounts</li>
+<li><code>/social remove</code> — remove an account</li>
+<li><code>/creator watch</code> — follow an external creator without requiring Discord membership</li>
+<li><code>/creator list</code> — view Creator Watch entries</li>
+<li><code>/creator unwatch</code> — stop watching a creator</li>
+</ul>
+</div>
+</div></section>
+<footer><div class="wrap foot">
+<span>© 2026 RoZAG Social Hub — Built for multi-server Discord communities.</span>
+<span class="links"><a href="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</a><a href="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a><a href="https://discord.gg/DhbnqFHH" target="_blank" rel="noopener noreferrer">RoZAG Discord Support</a></span>
+</div><div style="margin-top:10px">Support: <a href="https://discord.gg/DhbnqFHH" target="_blank" rel="noopener noreferrer">Join the RoZAG Discord Support Group</a> · YouTube, TikTok and Twitch supported now · Instagram, Kick and X / Twitter coming soon.</div></footer>
 <script>
 const INSTALL_URL="https://discord.com/oauth2/authorize?client_id=1537113386867761293";
-const STATUS_URL="https://rozag.coolvetspaces.com/api/status";
 
 function setInstall(){
   for(const id of ["install","install2"]){
-    document.getElementById(id).href=INSTALL_URL;
+    const a=document.getElementById(id);
+    a.href=INSTALL_URL||"#";
+    if(!INSTALL_URL)a.onclick=e=>{e.preventDefault();alert("The Discord install link will be enabled once the production install URL is added.");};
   }
 }
 
-function renderPlatform(id,value){
-  const el=document.getElementById(id);
-  if(!el)return;
-  let state="Not reported",online=false;
-  if(typeof value==="boolean"){
-    online=value; state=online?"Active":"Error";
-  }else if(value&&typeof value==="object"){
-    if(typeof value.online==="boolean"){
-      online=value.online; state=online?"Active":(value.status||"Error");
-    }else if(typeof value.status==="string"){
-      state=value.status;
-      online=/^(online|active|ok|healthy|connected)$/i.test(state);
-    }
-  }else if(typeof value==="string"&&value.trim()){
-    state=value;
-    online=/^(online|active|ok|healthy|connected)$/i.test(state);
-  }
-  el.innerHTML='<span class="dot '+(online?'':'off')+'"></span>'+state;
+function stateMarkup(item){
+  const status=(item&&item.status)||"offline";
+  const label=(item&&item.label)||"Offline";
+  const cls=status==="online"?"":" "+(status==="degraded"?"warn":"red");
+  return '<span class="dot '+cls.trim()+'"></span>'+label;
+}
+
+function setPlatform(prefix,item){
+  const state=document.getElementById(prefix+"-status");
+  const detail=document.getElementById(prefix+"-detail");
+  if(!state||!detail)return;
+  state.innerHTML=stateMarkup(item);
+  detail.textContent=(item&&item.detail)||"No status information reported.";
 }
 
 async function status(){
   try{
-    const r=await fetch(STATUS_URL,{cache:"no-store"});
+    const r=await fetch("/api/status",{cache:"no-store"});
     if(!r.ok)throw new Error("HTTP "+r.status);
     const d=await r.json();
-    const on=!!(d.bot_online??d.online);
-    document.getElementById("bot").innerHTML='<span class="dot '+(on?'':'off')+'"></span>'+(on?"Online":"Offline");
-    document.getElementById("servers").textContent=d.server_count??d.servers??"—";
-    document.getElementById("seen").textContent=d.last_seen_human||d.last_heartbeat||"—";
-    renderPlatform("youtube",d.youtube);
-    renderPlatform("tiktok",d.tiktok);
-    renderPlatform("twitch",d.twitch);
-    document.getElementById("status-note").textContent="Updated just now";
+
+    const on=!!d.bot_online;
+    document.getElementById("bot").innerHTML='<span class="dot '+(on?'':'red')+'"></span>'+(on?"Online":"Offline");
+    document.getElementById("servers").textContent=d.server_count??"—";
+    document.getElementById("seen").textContent=d.last_seen_human||"—";
+
+    setPlatform("youtube",d.youtube);
+    setPlatform("tiktok",d.tiktok);
+    setPlatform("twitch",d.twitch);
   }catch(e){
-    document.getElementById("bot").innerHTML='<span class="dot off"></span>Unavailable';
-    document.getElementById("servers").textContent="—";
-    document.getElementById("seen").textContent="Unavailable";
-    for(const id of ["youtube","tiktok","twitch"]){
-      const el=document.getElementById(id);
-      if(el)el.innerHTML='<span class="dot off"></span>Unavailable';
+    document.getElementById("bot").innerHTML='<span class="dot red"></span>Unavailable';
+    for(const p of ["youtube","tiktok","twitch"]){
+      setPlatform(p,{status:"offline",label:"Unavailable",detail:"Status API could not be reached."});
     }
-    document.getElementById("status-note").textContent="Status API unavailable";
   }
 }
-setInstall();status();setInterval(status,15000);
+
+setInstall();
+status();
+setInterval(status,15000);
 </script></body></html>
