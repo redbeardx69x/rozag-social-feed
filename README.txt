@@ -1,31 +1,30 @@
-FINAL SELF-CONTAINED RoZAG WEBSITE
+RoZAG Social Hub website package
+==================================
 
-This version deliberately puts ALL CSS and status JavaScript inside index.html.
-That prevents a stale/missing style.css from producing the broken unstyled
-feature/platform sections seen in the previous deployment.
+Upload all files in this folder to the website root:
 
-Upload:
-  index.html
-  assets/rozag-logo.png
+index.html
+about.html
+contact.html
+terms.html
+privacy.html
+app.js
+config.js
+styles.css
+favicon.ico
+rozag-logo.png
 
-to:
-  /home/coolvets/domains/rozag.coolvetspaces.com/public_html/website/
+The pages are linked to one another and all Discord install/support buttons
+open in a new tab.
 
-IMPORTANT:
-Replace the old index.html completely. Do not combine it with previous CSS or
-JS files.
+Configuration:
+- API: https://rozag.coolvetspaces.com/api/status
+- Discord install: production RoZAG application invite
+- Support: https://discord.gg/DhbnqFHH
 
-The large status card contains only:
-  Discord Bot
-  Servers connected
-  Last heartbeat
-
-The platform cards are below the hero:
-  YouTube Active
-  TikTok Active
-  Twitch Error
-  Kick Coming Soon
-  Instagram Coming Soon
-  X Coming Soon
-
-The status card polls /api/status every 15 seconds.
+IMPORTANT BACKEND NOTE:
+The public gateway must serve the website's static files (including
+styles.css, app.js, config.js and favicon.ico) if the gateway is also the
+web host. The gateway status endpoint must remain available at /api/status.
+The current gateway code already exposes the richer status payload fields
+used by this website.
