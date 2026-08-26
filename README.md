@@ -1,25 +1,109 @@
-# RoZAG Social Hub — GitHub Pages website
+# RoZAG Social Hub — GitHub Pages Website
 
-This package is the polished RoZAG Social Hub public website designed for GitHub Pages.
+The official RoZAG Social Hub public website for GitHub Pages.
+
+## Repository
+
+GitHub repository:
+
+`https://github.com/redbeardx69x/rozag-social-feed`
+
+Live website:
+
+`https://redbeardx69x.github.io/rozag-social-feed/`
 
 ## Upload
 
-Replace the existing website files in the repository with the contents of this folder. Keep the TikTok verification file from the current repository if TikTok is still using it; this package does not overwrite that file.
+Upload the complete contents of this package to the root of the
+`rozag-social-feed` repository.
 
-## Important configuration
+The package includes:
 
-Edit `config.js` before publishing if your backend's public read-only status endpoint is not:
+- `index.html`
+- `about.html`
+- `contact.html`
+- `terms.html`
+- `privacy.html`
+- `app.js`
+- `config.js`
+- `styles.css`
+- `favicon.ico`
+- `rozag-logo.png`
+
+Keep any existing TikTok verification file in the repository if TikTok
+is using it for app verification.
+
+## Website configuration
+
+The public website is already configured to use the RoZAG backend:
 
 `https://rozag.coolvetspaces.com/api/status`
 
-Also replace `YOUR_DISCORD_CLIENT_ID` in `index.html` with the actual Discord application client ID. Never put bot tokens, OAuth secrets, refresh tokens or database credentials in this repository.
+The Discord installation URL and support Discord are also configured in
+`config.js`.
 
-## Support
+Do not place any private credentials in this repository.
 
-The site uses the current RoZAG Social Hub support invite:
+Never store:
 
-https://discord.gg/rJFUWAGWHH
+- Discord bot tokens
+- TikTok client secrets
+- OAuth refresh tokens
+- Twitch client secrets
+- Database credentials
+- Other private API credentials
 
-## Share controls
+## Discord
 
-The share panel includes Discord/native share, X/Twitter, Facebook, Reddit, WhatsApp and Copy Link. The native Discord button uses the browser/device share sheet when available.
+The website's Discord buttons open the RoZAG Social Hub installation
+flow in a new browser tab.
+
+Support is provided through the RoZAG Discord Support Group:
+
+`https://discord.gg/DhbnqFHH`
+
+The support link also opens in a new tab.
+
+## Platform status
+
+The website displays independent status information for:
+
+- YouTube
+- TikTok
+- Twitch
+- Discord Bot
+
+Platform status is retrieved from the RoZAG backend rather than being
+hard-coded into the website.
+
+## GitHub Pages paths
+
+This website is designed to run from the repository path:
+
+`/rozag-social-feed/`
+
+Website assets therefore use relative paths such as:
+
+`./styles.css`
+
+`./app.js`
+
+`./config.js`
+
+`./favicon.ico`
+
+`./rozag-logo.png`
+
+This is important because GitHub Pages project sites do not serve these
+files from the domain root.
+
+## Favicon
+
+`favicon.ico` is included in the package and is referenced by the
+website.
+
+## Security
+
+The GitHub Pages repository contains only public frontend configuration.
+
+Never commit secrets or credentials to GitHub.
