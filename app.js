@@ -97,7 +97,7 @@
       if (!clientId) {
         link.href = cfg.SUPPORT_URL || "#";
         link.dataset.installUnavailable = "true";
-        link.title = "Discord installation link is being configured.";
+        link.title = "Discord installation link is not configured.";
         return;
       }
 
