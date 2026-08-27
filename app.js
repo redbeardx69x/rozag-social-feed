@@ -1,322 +1,242 @@
-// RoZAG Social Hub website application logic
-// Public status API client.
-// Compatible with both the current gateway status payload and older
-// object-based platform status payloads.
-
-(function () {
+(() => {
   "use strict";
 
   const cfg = window.ROZAG_CONFIG || {};
+  const $ = (selector) => document.querySelector(selector);
 
-  const API_BASE_URL = String(
-    cfg.API_BASE_URL || "https://rozag.coolvetspaces.com"
-  ).replace(/\/+$/, "");
+  const botEl = $("#bot-status");
+  const serverEl = $("#server-count");
+  const heartbeatEl = $("#heartbeat");
+  const updatedEl = $("#status-updated");
 
-  const STATUS_PATH = cfg.STATUS_PATH || "/api/status";
+  const platformEls = {
+    youtube: $("#platform-youtube"),
+    tiktok: $("#platform-tiktok"),
+    twitch: $("#platform-twitch"),
+    kick: $("#platform-kick")
+  };
 
-  const INSTALL_URL =
-    cfg.INSTALL_URL ||
-    "https://discord.com/oauth2/authorize?client_id=1537113386867761293";
+  const escapeHtml = (value) =>
+    String(value ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
 
-  const SUPPORT_URL =
-    cfg.SUPPORT_URL ||
-    "https://discord.gg/rJFUWAGWHH";
+  function renderState(el, state, label) {
+    if (!el) return;
+    const normalized = String(state || "").toLowerCase();
 
-  function byId(id) {
-    return document.getElementById(id);
-  }
+    let kind = "amber";
+    let text = label || "Checking";
 
-  function normalisePlatform(value) {
-    // New gateway format:
-    //   youtube: true / false
-    //
-    // Older gateway format:
-    //   youtube: { status, label, detail }
-    //
-    // Also accept:
-    //   platforms: { youtube: true, ... }
-
-    if (typeof value === "boolean") {
-      return {
-        status: value ? "online" : "offline",
-        label: value ? "Online" : "Offline",
-        detail: value
-          ? "Service online"
-          : "Service offline"
-      };
+    if (normalized === "online" || normalized === "up" || normalized === "true") {
+      kind = "green";
+      text = "Online";
+    } else if (normalized === "offline" || normalized === "down" || normalized === "false") {
+      kind = "red";
+      text = "Offline";
+    } else if (normalized === "degraded") {
+      kind = "amber";
+      text = "Degraded";
+    } else if (normalized === "unavailable") {
+      kind = "red";
+      text = "Unavailable";
     }
 
-    if (value && typeof value === "object") {
-      const status = String(value.status || "").toLowerCase();
+    el.innerHTML = `<i class="dot dot-${kind}"></i> ${escapeHtml(text)}`;
+  }
 
-      if (status === "online" || status === "degraded" || status === "offline") {
-        return {
-          status: status,
-          label: value.label || (
-            status === "online"
-              ? "Online"
-              : status === "degraded"
-                ? "Degraded"
-                : "Offline"
-          ),
-          detail: value.detail || "No status information reported."
-        };
+  function boolState(value) {
+    if (value === true || value === 1 || value === "true") return "online";
+    if (value === false || value === 0 || value === "false") return "offline";
+    return null;
+  }
+
+  function platformState(value, fallback) {
+    if (value == null) return fallback;
+    if (typeof value === "boolean" || typeof value === "number") return boolState(value) || fallback;
+
+    if (typeof value === "string") {
+      const s = value.toLowerCase();
+      if (["online","offline","degraded","unavailable"].includes(s)) return s;
+      return fallback;
+    }
+
+    if (typeof value === "object") {
+      if ("online" in value) return boolState(value.online) || fallback;
+      if ("status" in value) return platformState(value.status, fallback);
+      if ("state" in value) return platformState(value.state, fallback);
+    }
+
+    return fallback;
+  }
+
+  function formatHeartbeat(value) {
+    if (!value) return "—";
+
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+
+    const seconds = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+
+    if (seconds < 10) return "just now";
+    if (seconds < 60) return `${seconds}s ago`;
+
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+
+    return `${Math.floor(hours / 24)}d ago`;
+  }
+
+  function setDiscordInstallLinks() {
+    const clientId = String(cfg.DISCORD_CLIENT_ID || "").trim();
+
+    document.querySelectorAll(".discord-install").forEach(link => {
+      if (!clientId) {
+        link.href = cfg.SUPPORT_URL || "#";
+        link.dataset.installUnavailable = "true";
+        link.title = "Discord installation link is being configured.";
+        return;
       }
 
-      // Some payloads may use an online boolean inside the object.
-      if (typeof value.online === "boolean") {
-        return normalisePlatform(value.online);
-      }
-    }
+      const url =
+        `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(clientId)}` +
+        `&scope=bot%20applications.commands&permissions=0`;
 
-    return {
-      status: "offline",
-      label: "Offline",
-      detail: "No status information reported."
-    };
-  }
-
-  function stateMarkup(item) {
-    const status = item && item.status
-      ? item.status
-      : "offline";
-
-    const label = item && item.label
-      ? item.label
-      : "Offline";
-
-    let cls = "red";
-
-    if (status === "online") {
-      cls = "";
-    } else if (status === "degraded") {
-      cls = "warn";
-    }
-
-    return (
-      '<span class="dot ' +
-      cls +
-      '"></span>' +
-      label
-    );
-  }
-
-  function setPlatform(prefix, item) {
-    const state = byId(prefix + "-status");
-    const detail = byId(prefix + "-detail");
-
-    if (!state) return;
-
-    state.innerHTML = stateMarkup(item);
-
-    if (detail) {
-      detail.textContent =
-        (item && item.detail) ||
-        "No status information reported.";
-    }
-  }
-
-  function setExternalLinks() {
-    document.querySelectorAll("[data-install-link]").forEach(function (link) {
-      link.href = INSTALL_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-    });
-
-    document.querySelectorAll("[data-support-link]").forEach(function (link) {
-      link.href = SUPPORT_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-    });
-
-    // Compatibility with the existing index.html buttons.
-    ["install", "install2"].forEach(function (id) {
-      const link = byId(id);
-      if (!link) return;
-
-      link.href = INSTALL_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
+      link.href = url;
+      link.removeAttribute("data-install-unavailable");
+      link.removeAttribute("title");
     });
   }
 
-  function setUnavailable() {
-    const bot = byId("bot");
-    const servers = byId("servers");
-    const seen = byId("seen");
-
-    if (bot) {
-      bot.innerHTML =
-        '<span class="dot red"></span>Unavailable';
+  async function refreshStatus() {
+    if (!cfg.STATUS_ENDPOINT) {
+      renderState(botEl, "degraded", "Not configured");
+      serverEl.textContent = "—";
+      heartbeatEl.textContent = "—";
+      Object.values(platformEls).forEach(el => renderState(el, "degraded", "Not configured"));
+      updatedEl.textContent = "Status endpoint not configured";
+      return;
     }
-
-    if (servers) {
-      servers.textContent = "—";
-    }
-
-    if (seen) {
-      seen.textContent = "—";
-    }
-
-    ["youtube", "tiktok", "twitch", "kick"].forEach(function (platform) {
-      setPlatform(platform, {
-        status: "offline",
-        label: "Unavailable",
-        detail: "Status API could not be reached."
-      });
-    });
-  }
-
-  function normalisePayload(data) {
-    const platformSource =
-      data && data.platforms && typeof data.platforms === "object"
-        ? data.platforms
-        : {};
-
-    function platformValue(name) {
-      if (Object.prototype.hasOwnProperty.call(platformSource, name)) {
-        return normalisePlatform(platformSource[name]);
-      }
-
-      if (data && Object.prototype.hasOwnProperty.call(data, name)) {
-        return normalisePlatform(data[name]);
-      }
-
-      return normalisePlatform(false);
-    }
-
-    const botOnline = Boolean(
-      data && (
-        data.bot_online !== undefined
-          ? data.bot_online
-          : data.online
-      )
-    );
-
-    return {
-      botOnline: botOnline,
-
-      servers:
-        data && data.server_count !== undefined
-          ? data.server_count
-          : data && data.servers !== undefined
-            ? data.servers
-            : "—",
-
-      seen:
-        data && data.last_seen_human
-          ? data.last_seen_human
-          : data && data.last_heartbeat
-            ? data.last_heartbeat
-            : data && data.last_seen
-              ? data.last_seen
-              : "—",
-
-      youtube: platformValue("youtube"),
-      tiktok: platformValue("tiktok"),
-      twitch: platformValue("twitch"),
-      kick: platformValue("kick")
-    };
-  }
-
-  async function loadStatus() {
-    const url =
-      API_BASE_URL +
-      STATUS_PATH +
-      (STATUS_PATH.indexOf("?") >= 0 ? "&" : "?") +
-      "t=" +
-      Date.now();
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(cfg.STATUS_ENDPOINT, {
         method: "GET",
         cache: "no-store",
-        headers: {
-          Accept: "application/json"
-        }
+        headers: { "Accept": "application/json" }
       });
 
-      if (!response.ok) {
-        throw new Error(
-          "Status API HTTP " + response.status
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const data = await response.json();
+
+      const botOnline =
+        boolState(data.bot_online) ||
+        boolState(data.online) ||
+        (String(data.status || "").toLowerCase() === "online" ? "online" : null) ||
+        "offline";
+
+      renderState(botEl, botOnline);
+
+      serverEl.textContent =
+        data.server_count ??
+        data.servers ??
+        data.guilds ??
+        "—";
+
+      heartbeatEl.textContent =
+        formatHeartbeat(
+          data.last_seen ??
+          data.last_heartbeat ??
+          data.heartbeat ??
+          data.lastHeartbeat
         );
+
+      const platforms = data.platforms || {};
+
+      /*
+        The current gateway exposes platform health independently when available.
+        If it doesn't, use the bot health as a safe fallback so the website
+        doesn't incorrectly report every integration as unavailable.
+      */
+      for (const [name, el] of Object.entries(platformEls)) {
+        const state = platformState(platforms[name], botOnline);
+        renderState(el, state);
       }
 
-      const contentType =
-        response.headers.get("content-type") || "";
-
-      if (
-        !contentType
-          .toLowerCase()
-          .includes("application/json")
-      ) {
-        throw new Error(
-          "Status API did not return JSON"
-        );
-      }
-
-      const raw = await response.json();
-      const data = normalisePayload(raw);
-
-      const bot = byId("bot");
-      const servers = byId("servers");
-      const seen = byId("seen");
-
-      if (bot) {
-        bot.innerHTML =
-          '<span class="dot ' +
-          (data.botOnline ? "" : "red") +
-          '"></span>' +
-          (data.botOnline ? "Online" : "Offline");
-      }
-
-      if (servers) {
-        servers.textContent = data.servers;
-      }
-
-      if (seen) {
-        seen.textContent = data.seen;
-      }
-
-      setPlatform("youtube", data.youtube);
-      setPlatform("tiktok", data.tiktok);
-      setPlatform("twitch", data.twitch);
-      setPlatform("kick", data.kick);
-
-      console.info(
-        "[RoZAG] Status API OK:",
-        API_BASE_URL + STATUS_PATH,
-        raw
-      );
+      updatedEl.textContent = "Updated just now";
     } catch (error) {
-      console.error(
-        "[RoZAG] Status API failed:",
-        error
-      );
+      console.error("RoZAG status request failed:", error);
 
-      // Only show "Unavailable" when the API itself could not be read.
-      // A successfully returned false/Offline value must remain Offline.
-      setUnavailable();
+      renderState(botEl, "unavailable");
+      serverEl.textContent = "—";
+      heartbeatEl.textContent = "—";
+
+      Object.values(platformEls).forEach(el => renderState(el, "unavailable"));
+      updatedEl.textContent = "Status service unavailable";
     }
   }
 
-  function start() {
-    setExternalLinks();
-    loadStatus();
+  setDiscordInstallLinks();
+  refreshStatus();
+  setInterval(refreshStatus, 15000);
 
-    // Refresh every 15 seconds.
-    window.setInterval(
-      loadStatus,
-      15000
-    );
-  }
+  document.querySelectorAll("[data-share-link]").forEach(el => {
+    const siteUrl = encodeURIComponent(cfg.SITE_URL || window.location.href);
+    const title = encodeURIComponent("RoZAG Social Hub — Social feeds, built for Discord.");
 
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      start
-    );
-  } else {
-    start();
-  }
+    const map = {
+      x: `https://twitter.com/intent/tweet?url=${siteUrl}&text=${title}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${siteUrl}`,
+      reddit: `https://www.reddit.com/submit?url=${siteUrl}&title=${title}`,
+      whatsapp: `https://wa.me/?text=${title}%20${siteUrl}`
+    };
+
+    el.href = map[el.dataset.shareLink] || "#";
+  });
+
+  $('[data-share="copy"]')?.addEventListener("click", async () => {
+    const message = $("#share-message");
+
+    try {
+      await navigator.clipboard.writeText(cfg.SITE_URL || window.location.href);
+      if (message) message.textContent = "Link copied!";
+    } catch {
+      if (message) message.textContent = "Copy failed — select the address bar instead.";
+    }
+  });
+
+  $('[data-share="native"]')?.addEventListener("click", async () => {
+    const message = $("#share-message");
+    const shareData = {
+      title: "RoZAG Social Hub",
+      text: "Social feeds, built for Discord.",
+      url: cfg.SITE_URL || window.location.href
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        if (message) message.textContent = "Share sheet opened.";
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        if (message) message.textContent = "Share isn't supported here — link copied instead.";
+      }
+    } catch (error) {
+      if (error?.name !== "AbortError" && message) {
+        message.textContent = "Share cancelled.";
+      }
+    }
+  });
+
+  document.addEventListener("click", event => {
+    const link = event.target.closest('[data-install-unavailable="true"]');
+    if (!link) return;
+
+    event.preventDefault();
+    const supportUrl = cfg.SUPPORT_URL;
+    if (supportUrl) window.open(supportUrl, "_blank", "noopener,noreferrer");
+  });
 })();
