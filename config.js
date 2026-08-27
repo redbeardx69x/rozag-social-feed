@@ -1,18 +1,16 @@
-/*
-  RoZAG Social Hub public website configuration.
-  No bot tokens, OAuth secrets, refresh tokens or database credentials belong here.
-*/
-window.ROZAG_CONFIG = {
-  STATUS_ENDPOINT: "https://rozag.coolvetspaces.com/api/status",
-  SUPPORT_URL: "https://discord.gg/rJFUWAGWHH",
+// RoZAG Social Hub website configuration
+// Public values only. Never place bot tokens, OAuth secrets,
+// refresh tokens, database credentials or other private secrets here.
 
-  /*
-    Replace DISCORD_CLIENT_ID with the Discord application's CLIENT ID.
-    This is NOT the Kick client ID.
-    The website will leave the buttons disabled until a real Discord
-    application ID is supplied, rather than sending visitors to a broken URL.
-  */
-  DISCORD_CLIENT_ID: "1537113386867761293",
+window.ROZAG_CONFIG = Object.freeze({
+  API_BASE_URL: "https://rozag.coolvetspaces.com",
+  STATUS_PATH: "/api/status",
 
-  SITE_URL: "https://redbeardx69x.github.io/rozag-social-feed/"
-};
+  // Discord application install URL.
+  INSTALL_URL:
+    "https://discord.com/oauth2/authorize?client_id=1537113386867761293",
+
+  // RoZAG Social Hub support Discord.
+  SUPPORT_URL:
+    "https://discord.gg/rJFUWAGWHH"
+});
