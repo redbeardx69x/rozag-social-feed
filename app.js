@@ -85,7 +85,7 @@
       ? item.label
       : "Offline";
 
-    let cls = "red";
+    let cls = "off";
 
     if (status === "online") {
       cls = "";
@@ -102,7 +102,10 @@
   }
 
   function setPlatform(prefix, item) {
-    const state = byId(prefix + "-status");
+    // Current index.html uses ids such as #youtube directly.
+    // Older markup used #youtube-status / #youtube-detail.
+    // Support both so the live status cannot get stuck on Checking....
+    const state = byId(prefix + "-status") || byId(prefix);
     const detail = byId(prefix + "-detail");
 
     if (!state) return;
@@ -143,24 +146,24 @@
   function setUnavailable() {
     const bot = byId("bot");
     const servers = byId("servers");
-    const accounts = byId("accounts");
     const seen = byId("seen");
+    const accounts = byId("accounts");
 
     if (bot) {
       bot.innerHTML =
-        '<span class="dot red"></span>Unavailable';
+        '<span class="dot off"></span>Unavailable';
     }
 
     if (servers) {
       servers.textContent = "—";
     }
 
-    if (accounts) {
-      accounts.textContent = "—";
-    }
-
     if (seen) {
       seen.textContent = "—";
+    }
+
+    if (accounts) {
+      accounts.textContent = "—";
     }
 
     ["youtube", "tiktok", "twitch", "kick"].forEach(function (platform) {
@@ -213,9 +216,7 @@
           ? data.account_count
           : data && data.accounts_followed !== undefined
             ? data.accounts_followed
-            : data && data.accounts !== undefined
-              ? data.accounts
-              : "—",
+            : "—",
 
       seen:
         data && data.last_seen_human
@@ -274,13 +275,13 @@
 
       const bot = byId("bot");
       const servers = byId("servers");
-      const accounts = byId("accounts");
       const seen = byId("seen");
+      const accounts = byId("accounts");
 
       if (bot) {
         bot.innerHTML =
           '<span class="dot ' +
-          (data.botOnline ? "" : "red") +
+          (data.botOnline ? "" : "off") +
           '"></span>' +
           (data.botOnline ? "Online" : "Offline");
       }
@@ -289,12 +290,12 @@
         servers.textContent = data.servers;
       }
 
-      if (accounts) {
-        accounts.textContent = data.accounts;
-      }
-
       if (seen) {
         seen.textContent = data.seen;
+      }
+
+      if (accounts) {
+        accounts.textContent = data.accounts;
       }
 
       setPlatform("youtube", data.youtube);
