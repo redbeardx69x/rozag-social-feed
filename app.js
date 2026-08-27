@@ -1,14 +1,16 @@
 // RoZAG Social Hub website application logic
-// Uses the public RoZAG gateway API instead of assuming the website
-// and API are hosted on the same origin.
+// Public status is served by the RoZAG gateway.
 
 (function () {
   "use strict";
 
   const cfg = window.ROZAG_CONFIG || {};
-  const API_BASE_URL = String(cfg.API_BASE_URL || "https://rozag.coolvetspaces.com").replace(/\/+$/, "");
+  const API_BASE_URL = String(
+    cfg.API_BASE_URL || "https://rozag.coolvetspaces.com"
+  ).replace(/\/+$/, "");
   const STATUS_PATH = cfg.STATUS_PATH || "/api/status";
-  const INSTALL_URL = cfg.INSTALL_URL || "https://discord.com/oauth2/authorize?client_id=1537113386867761293";
+  const INSTALL_URL = cfg.INSTALL_URL ||
+    "https://discord.com/oauth2/authorize?client_id=1537113386867761293&scope=bot%20applications.commands&permissions=93200";
 
   function byId(id) {
     return document.getElementById(id);
@@ -18,28 +20,30 @@
     const status = (item && item.status) || "offline";
     const label = (item && item.label) || "Offline";
     const cls = status === "online"
-      ? ""
+      ? "online"
       : (status === "degraded" ? "warn" : "red");
 
-    return '<span class="dot ' + cls.trim() + '"></span>' + label;
+    return '<span class="dot ' + cls + '"></span>' + label;
   }
 
   function setPlatform(prefix, item) {
     const state = byId(prefix + "-status");
     const detail = byId(prefix + "-detail");
 
-    if (!state || !detail) return;
+    if (!state) return;
 
     state.innerHTML = stateMarkup(item);
-    detail.textContent =
-      (item && item.detail) || "No status information reported.";
+
+    if (detail) {
+      detail.textContent =
+        (item && item.detail) || "No status information reported.";
+    }
   }
 
   function setInstallLinks() {
     ["install", "install2"].forEach(function (id) {
       const link = byId(id);
       if (!link) return;
-
       link.href = INSTALL_URL;
       link.target = "_blank";
       link.rel = "noopener noreferrer";
@@ -77,9 +81,7 @@
       const response = await fetch(url, {
         method: "GET",
         cache: "no-store",
-        headers: {
-          "Accept": "application/json"
-        }
+        headers: { "Accept": "application/json" }
       });
 
       if (!response.ok) {
@@ -92,7 +94,6 @@
       }
 
       const data = await response.json();
-
       const botOnline = !!data.bot_online;
       const bot = byId("bot");
       const servers = byId("servers");
@@ -100,20 +101,17 @@
 
       if (bot) {
         bot.innerHTML =
-          '<span class="dot ' + (botOnline ? "" : "red") + '"></span>' +
+          '<span class="dot ' + (botOnline ? "online" : "red") + '"></span>' +
           (botOnline ? "Online" : "Offline");
       }
 
       if (servers) {
-        servers.textContent =
-          data.server_count ?? data.servers ?? "—";
+        servers.textContent = data.server_count ?? data.servers ?? "—";
       }
 
       if (seen) {
         seen.textContent =
-          data.last_seen_human ||
-          data.last_heartbeat ||
-          "—";
+          data.last_seen_human || data.last_heartbeat || "—";
       }
 
       setPlatform("youtube", data.youtube);
@@ -131,8 +129,6 @@
   function start() {
     setInstallLinks();
     loadStatus();
-
-    // Keep the website status current without requiring a page refresh.
     window.setInterval(loadStatus, 15000);
   }
 
