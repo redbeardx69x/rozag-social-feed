@@ -12,7 +12,7 @@ window.ROZAG_CONFIG = {
     The website will leave the buttons disabled until a real Discord
     application ID is supplied, rather than sending visitors to a broken URL.
   */
-  DISCORD_CLIENT_ID: "01M1130065W7GF93P148ZD2KZZ",
+  DISCORD_CLIENT_ID: "1537113386867761293",
 
   SITE_URL: "https://redbeardx69x.github.io/rozag-social-feed/"
 };
