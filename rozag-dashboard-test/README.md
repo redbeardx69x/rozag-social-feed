@@ -1,21 +1,20 @@
-RoZAG Server Dashboard — TEST ONLY
+# RoZAG Dashboard TEST — Updated Frontend
 
-This folder is intentionally separate from the production website.
+Replace the existing files in the GitHub Pages `rozag-dashboard-test` folder with:
 
-Frontend:
 - index.html
 - app.js
 - config.js
-- rozag-logo.png
 
-The frontend expects a future backend at:
-https://rozag.coolvetspaces.com/dashboard-test/
+Keep your existing `rozag-logo.png`.
 
-The backend must implement Discord OAuth2 and return /dashboard-test/api/me as:
-{
-  "authenticated": true,
-  "user": {"id":"...","username":"...","global_name":"..."},
-  "guilds": [{"id":"...","name":"...","icon_emoji":"🏴‍☠️"}]
-}
+## Changes
 
-Do not put the Discord client secret in this folder or in GitHub Pages.
+- Sign-out button is now gold-accented and more visible.
+- Sign-out asks for confirmation before logging out.
+- Logged-in Discord user's profile picture is loaded from Discord's CDN.
+- Discord server icons are also loaded from Discord's CDN when available.
+- Existing TEST-mode server display remains read-only.
+- No production RoZAG bot files are included or changed.
+
+The Python backend does not need to be replaced for these frontend changes.
