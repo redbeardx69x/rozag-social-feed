@@ -144,7 +144,6 @@
     const bot = byId("bot");
     const servers = byId("servers");
     const seen = byId("seen");
-    const accounts = byId("accounts");
 
     if (bot) {
       bot.innerHTML =
@@ -157,9 +156,6 @@
 
     if (seen) {
       seen.textContent = "—";
-    }
-    if (accounts) {
-      accounts.textContent = "—";
     }
 
     ["youtube", "tiktok", "twitch", "kick"].forEach(function (platform) {
@@ -206,15 +202,6 @@
           : data && data.servers !== undefined
             ? data.servers
             : "—",
-
-      accounts:
-        data && data.account_count !== undefined
-          ? data.account_count
-          : data && data.accounts_followed !== undefined
-            ? data.accounts_followed
-            : data && data.accounts !== undefined
-              ? data.accounts
-              : "—",
 
       seen:
         data && data.last_seen_human
@@ -274,7 +261,6 @@
       const bot = byId("bot");
       const servers = byId("servers");
       const seen = byId("seen");
-      const accounts = byId("accounts");
 
       if (bot) {
         bot.innerHTML =
@@ -290,10 +276,6 @@
 
       if (seen) {
         seen.textContent = data.seen;
-      }
-
-      if (accounts) {
-        accounts.textContent = data.accounts;
       }
 
       setPlatform("youtube", data.youtube);

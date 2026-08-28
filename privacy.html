@@ -2,38 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Privacy Policy — RoZAG Social Hub</title>
-<link rel="icon" type="image/x-icon" href="./favicon.ico">
-<link rel="stylesheet" href="./styles.css">
+<title>Privacy Policy — RoZAG Social Hub</title><style>
+:root{color-scheme:dark}
+body{margin:0;background:#111318;color:#e7e9ee;font-family:Inter,Segoe UI,Arial,sans-serif;line-height:1.65}
+main{max-width:900px;margin:50px auto;padding:0 24px}
+h1{font-size:38px;margin-bottom:8px}
+h2{margin-top:34px;color:#fff}
+p,li{color:#c9ccd3}
+a{color:#62a8ff}
+.notice{background:#1c2029;border:1px solid #343b48;border-radius:10px;padding:16px 18px;margin:24px 0}
+.links{display:flex;flex-wrap:wrap;gap:12px 20px;margin-top:12px}
+small{color:#9298a5}
+</style>
 </head>
-<body>
-<nav><div class="wrap nav">
-<a class="brand" href="./index.html"><img src="./rozag-logo.png" alt="RoZAG"><span>ROZAG SOCIAL HUB</span></a>
-<div class="navlinks"><a href="./index.html">Home</a><a href="./about.html">About</a><a href="./index.html#platform-status">Status</a><a href="./terms.html">Terms</a></div>
-<a class="btn primary" href="https://discord.com/oauth2/authorize?client_id=1537113386867761293" target="_blank" rel="noopener noreferrer">Add to Discord</a>
-</div></nav>
-<main class="page"><div class="wrap"><div class="page-card">
+<body><main>
 <h1>Privacy Policy</h1>
-<p><small>RoZAG Social Hub · Effective 26 August 2026</small></p>
-<h2>1. What RoZAG Social Hub does</h2>
-<p>RoZAG Social Hub connects Discord servers to supported creator feeds. The application stores configuration and delivery information needed to provide those features.</p>
-<h2>2. Discord information</h2>
-<p>RoZAG may store Discord server identifiers, channel identifiers and configuration required to deliver feeds to the correct server and channel. The application also uses information supplied by Discord to operate the bot and determine server configuration.</p>
-<h2>3. Social platform information</h2>
-<p>For connected creators, RoZAG may store public creator identifiers, usernames, profile URLs, stream or post identifiers and delivery state. Where authorization is required, RoZAG stores the authorization information needed to provide the integration.</p>
-<h2>4. TikTok authorization</h2>
-<p>TikTok authorization is performed through TikTok's official OAuth flow. RoZAG does not request or store a TikTok password.</p>
-<h2>5. Website status</h2>
-<p>The website exposes a limited public service-status endpoint showing operational status, server count and heartbeat information. It is intended for service health visibility and does not expose private creator authorization data.</p>
-<h2>6. Data sharing</h2>
-<p>RoZAG does not sell personal information. Data is processed as necessary to operate the Discord application and its connected platform integrations. Third-party platforms remain subject to their own privacy policies.</p>
-<h2>7. Security</h2>
-<p>Reasonable technical measures are used to protect stored application data and authorization information. No internet service can guarantee absolute security.</p>
-<h2>8. Retention and removal</h2>
-<p>Configuration and delivery data may be retained while an integration or server is configured. Removing an account or server configuration may remove or deactivate associated operational data according to the application's database and maintenance processes.</p>
-<h2>9. Support</h2>
-<p>Privacy questions and support requests are handled through the RoZAG Discord Support Group.</p>
-<div class="contact-actions"><a class="btn primary" href="https://discord.gg/DhbnqFHH" target="_blank" rel="noopener noreferrer">RoZAG Discord Support</a><a class="btn" href="./index.html">Back to Home</a></div>
-</div></div></main>
-<footer><div class="wrap foot"><span>© 2026 RoZAG Social Hub</span><span>Last updated: 26 August 2026</span></div></footer>
-</body></html>
+<small>RoZAG Social Hub · Effective 18 August 2026</small>
+
+<div class="notice"><strong>Summary:</strong> RoZAG Social Hub is designed to collect and retain only the information needed to operate its Discord social-feed features and authorized social integrations.</div>
+
+<h2>1. What this policy covers</h2>
+<p>This policy explains how RoZAG Social Hub processes information when it is installed in a Discord server or when a person authorizes a supported social account.</p>
+
+<h2>2. Information processed</h2>
+<ul>
+<li><strong>Discord information:</strong> Discord server/guild identifiers, channel identifiers, user/member identifiers, usernames or display information needed to associate a creator with a Discord member, and information provided through interactions with the application.</li>
+<li><strong>Social-account information:</strong> Creator names, usernames, profile URLs, platform account identifiers, and public content metadata needed to monitor a subscribed creator feed.</li>
+<li><strong>OAuth information:</strong> Where a creator authorizes a platform such as TikTok, the application may store access and refresh tokens securely on its server so it can continue performing the authorized function without requiring the creator to authorize every polling cycle.</li>
+<li><strong>Operational information:</strong> Application configuration, enabled/disabled status, timestamps, polling state, and identifiers used to prevent duplicate feed posts.</li>
+</ul>
+
+<h2>3. TikTok data</h2>
+<p>When a creator authorizes TikTok, RoZAG Social Hub uses TikTok's official authorization flow. The current integration requests <code>user.info.basic</code> and <code>video.list</code>. TikTok documents these as read-only access to basic profile information and a user's public TikTok videos. RoZAG uses that data to associate the authorized creator with the registered feed and retrieve public videos for Discord notifications.</p>
+<p>RoZAG Social Hub does not request or store a creator's TikTok password. OAuth access and refresh tokens are handled server-side.</p>
+
+<h2>4. How information is used</h2>
+<ul>
+<li>To identify and manage registered social-feed accounts.</li>
+<li>To send authorization instructions to the Discord member linked to a creator account.</li>
+<li>To retrieve authorized public social content and publish permitted feed notifications in Discord.</li>
+<li>To maintain OAuth authorization and refresh access when supported by the connected platform.</li>
+<li>To prevent duplicate posts and maintain reliable feed operation.</li>
+<li>To diagnose technical problems and maintain security.</li>
+</ul>
+
+<h2>5. What we do not do</h2>
+<p>RoZAG Social Hub is not designed to sell personal information, build advertising profiles, or collect social-media passwords.</p>
+<p>The application does not intentionally scrape private social-media content. Its TikTok integration uses TikTok's official API.</p>
+
+<h2>6. Discord and third-party platforms</h2>
+<p>Discord, TikTok, YouTube, Twitch, and their related services have their own privacy policies and data practices. RoZAG Social Hub is a separate third-party application and does not control how those platforms process information.</p>
+<p>Our privacy policy describes RoZAG's own processing. It does not replace the privacy policy of any connected platform.</p>
+<div class="links">
+<a href="https://discord.com/privacy" target="_blank" rel="noopener noreferrer">Discord Privacy Policy ↗</a>
+<a href="https://www.tiktok.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">TikTok Privacy Policy ↗</a>
+<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy ↗</a>
+<a href="https://www.twitch.tv/p/privacy-notice" target="_blank" rel="noopener noreferrer">Twitch Privacy Notice ↗</a>
+</div>
+
+<h2>7. Sharing</h2>
+<p>Information is shared only as necessary to operate the requested integration. For example, authorized public creator content and feed metadata are sent to the configured Discord server/channel. OAuth information is used for communication with the relevant platform's API.</p>
+<p>We do not sell personal information.</p>
+
+<h2>8. Security</h2>
+<p>OAuth credentials are intended to be kept server-side and are not displayed to Discord users. Access to the application server and database should be restricted to authorized operators.</p>
+<p>No internet service can guarantee absolute security, so users should avoid submitting information that is not necessary for the application's operation.</p>
+
+<h2>9. Retention and deletion</h2>
+<p>Account configuration and integration data may be retained while a creator or server is subscribed to the relevant feed. Removing a social account or removing the application from a server is intended to stop that integration. Where stored OAuth credentials are no longer required, they should be revoked or deleted as part of account removal or maintenance.</p>
+
+<h2>10. Your choices</h2>
+<p>A creator can choose not to authorize a social integration. A server administrator can remove a registered social account or remove the application from the server. A creator can also revoke authorization through the relevant third-party platform where that platform provides such a control.</p>
+
+<h2>11. Children's privacy</h2>
+<p>RoZAG Social Hub is not intended to collect information from children for independent use. The application operates inside Discord servers and relies on Discord and connected platforms for their own age and safety controls.</p>
+
+<h2>12. Changes to this policy</h2>
+<p>This policy may be updated when the application, integrations, or applicable requirements change. Material changes will be reflected by updating the effective date.</p>
+
+<h2>13. Contact</h2>
+<p>For privacy questions or requests relating to RoZAG Social Hub, contact the application operator through the RoZAG Discord community or the contact method published with the application.</p>
+
+<div class="notice"><strong>Last updated:</strong> 18 August 2026</div>
+</main></body></html>
