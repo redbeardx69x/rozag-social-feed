@@ -143,6 +143,7 @@
   function setUnavailable() {
     const bot = byId("bot");
     const servers = byId("servers");
+    const accounts = byId("accounts");
     const seen = byId("seen");
 
     if (bot) {
@@ -152,6 +153,10 @@
 
     if (servers) {
       servers.textContent = "—";
+    }
+
+    if (accounts) {
+      accounts.textContent = "—";
     }
 
     if (seen) {
@@ -202,6 +207,17 @@
           : data && data.servers !== undefined
             ? data.servers
             : "—",
+
+      accounts:
+        data && data.account_count !== undefined
+          ? data.account_count
+          : data && data.accounts_count !== undefined
+            ? data.accounts_count
+            : data && data.accounts !== undefined
+              ? data.accounts
+              : data && data.connected_accounts !== undefined
+                ? data.connected_accounts
+                : "—",
 
       seen:
         data && data.last_seen_human
@@ -260,6 +276,7 @@
 
       const bot = byId("bot");
       const servers = byId("servers");
+      const accounts = byId("accounts");
       const seen = byId("seen");
 
       if (bot) {
@@ -272,6 +289,10 @@
 
       if (servers) {
         servers.textContent = data.servers;
+      }
+
+      if (accounts) {
+        accounts.textContent = data.accounts;
       }
 
       if (seen) {

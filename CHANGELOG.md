@@ -1,8 +1,7 @@
-# RoZAG Website Update
+# RoZAG Website Status Layout Fix
 
-- Added a gold **Log In** button; clicking it explains that dashboard login is planned for a future release.
-- Changed **COMING SOON** platform badges to RoZAG gold so they are clearly distinct from active integrations.
-- Added a gold **Share RoZAG · Copy Link** button with clipboard support and a copied confirmation.
-- Added a full-width **Support the Republic of ZA Gamers** panel beneath the About/admin panels.
-- Added the requested Republic of ZA Gamers Discord invite.
-- Existing production API/status logic and Discord install configuration are unchanged.
+- Restored the standalone Live Platform Status strip to its existing location.
+- Removed platform status from the RoZAG Social Hub/server status card.
+- Server status card now contains only: Servers connected, Accounts connected, Last heartbeat.
+- Added frontend support for account_count, accounts_count, accounts, and connected_accounts status payload fields.
+- Existing social cards, tip section, sharing section, community section, and navigation were left intact.
