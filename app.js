@@ -1,340 +1,196 @@
-// RoZAG Social Hub website application logic
-// Public status API client.
-// Compatible with both the current gateway status payload and older
-// object-based platform status payloads.
-
 (function () {
   "use strict";
 
-  const cfg = window.ROZAG_CONFIG || {};
+  const cfg = window.ROZAG_DASHBOARD_CONFIG || {};
+  const auth = cfg.AUTH_START_URL || "#";
+  const me = cfg.AUTH_ME_URL || "";
+  const logoutUrl = cfg.LOGOUT_URL || "./";
 
-  const API_BASE_URL = String(
-    cfg.API_BASE_URL || "https://rozag.coolvetspaces.com"
-  ).replace(/\/+$/, "");
+  const login = document.getElementById("login");
+  const dash = document.getElementById("dashboard");
+  const user = document.getElementById("user");
+  const servers = document.getElementById("servers");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logout");
+  const username = document.getElementById("username");
+  const avatar = document.getElementById("avatar");
 
-  const STATUS_PATH = cfg.STATUS_PATH || "/api/status";
+  loginBtn.href = auth;
 
-  const INSTALL_URL =
-    cfg.INSTALL_URL ||
-    "https://discord.com/oauth2/authorize?client_id=1537113386867761293";
+  /*
+   * Discord profile picture
+   *
+   * The backend already returns:
+   *   user.id
+   *   user.avatar
+   *
+   * Discord's CDN can therefore be used directly by the browser.
+   * We never expose the Discord OAuth access token here.
+   */
+  function discordAvatarUrl(userData) {
+    if (!userData || !userData.id || !userData.avatar) {
+      return null;
+    }
 
-  const SUPPORT_URL =
-    cfg.SUPPORT_URL ||
-    "https://discord.gg/rJFUWAGWHH";
-
-  function byId(id) {
-    return document.getElementById(id);
+    return "https://cdn.discordapp.com/avatars/" +
+      encodeURIComponent(userData.id) + "/" +
+      encodeURIComponent(userData.avatar) +
+      ".png?size=128";
   }
 
-  function normalisePlatform(value) {
-    // New gateway format:
-    //   youtube: true / false
-    //
-    // Older gateway format:
-    //   youtube: { status, label, detail }
-    //
-    // Also accept:
-    //   platforms: { youtube: true, ... }
+  function renderAvatar(userData) {
+    const imageUrl = discordAvatarUrl(userData);
 
-    if (typeof value === "boolean") {
-      return {
-        status: value ? "online" : "offline",
-        label: value ? "Online" : "Offline",
-        detail: value
-          ? "Service online"
-          : "Service offline"
+    if (imageUrl) {
+      avatar.innerHTML = "";
+
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.alt = "Discord profile picture";
+      img.referrerPolicy = "no-referrer";
+
+      img.onerror = function () {
+        avatar.textContent =
+          (userData && userData.username
+            ? userData.username.charAt(0)
+            : "D"
+          ).toUpperCase();
       };
+
+      avatar.appendChild(img);
+      return;
     }
 
-    if (value && typeof value === "object") {
-      const status = String(value.status || "").toLowerCase();
-
-      if (status === "online" || status === "degraded" || status === "offline") {
-        return {
-          status: status,
-          label: value.label || (
-            status === "online"
-              ? "Online"
-              : status === "degraded"
-                ? "Degraded"
-                : "Offline"
-          ),
-          detail: value.detail || "No status information reported."
-        };
-      }
-
-      // Some payloads may use an online boolean inside the object.
-      if (typeof value.online === "boolean") {
-        return normalisePlatform(value.online);
-      }
-    }
-
-    return {
-      status: "offline",
-      label: "Offline",
-      detail: "No status information reported."
-    };
+    avatar.textContent =
+      (userData && userData.username
+        ? userData.username.charAt(0)
+        : "D"
+      ).toUpperCase();
   }
 
-  function stateMarkup(item) {
-    const status = item && item.status
-      ? item.status
-      : "offline";
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (char) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[char];
+    });
+  }
 
-    const label = item && item.label
-      ? item.label
-      : "Offline";
-
-    let cls = "red";
-
-    if (status === "online") {
-      cls = "";
-    } else if (status === "degraded") {
-      cls = "warn";
+  function guildIconUrl(guild) {
+    if (!guild || !guild.id || !guild.icon) {
+      return null;
     }
 
     return (
-      '<span class="dot ' +
-      cls +
-      '"></span>' +
-      label
+      "https://cdn.discordapp.com/icons/" +
+      encodeURIComponent(guild.id) + "/" +
+      encodeURIComponent(guild.icon) +
+      ".png?size=128"
     );
   }
 
-  function setPlatform(prefix, item) {
-    const state = byId(prefix + "-status");
-    const detail = byId(prefix + "-detail");
-
-    if (!state) return;
-
-    state.innerHTML = stateMarkup(item);
-
-    if (detail) {
-      detail.textContent =
-        (item && item.detail) ||
-        "No status information reported.";
-    }
-  }
-
-  function setExternalLinks() {
-    document.querySelectorAll("[data-install-link]").forEach(function (link) {
-      link.href = INSTALL_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-    });
-
-    document.querySelectorAll("[data-support-link]").forEach(function (link) {
-      link.href = SUPPORT_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-    });
-
-    // Compatibility with the existing index.html buttons.
-    ["install", "install2"].forEach(function (id) {
-      const link = byId(id);
-      if (!link) return;
-
-      link.href = INSTALL_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-    });
-  }
-
-  function setUnavailable() {
-    const bot = byId("bot");
-    const servers = byId("servers");
-    const seen = byId("seen");
-    const accounts = byId("accounts");
-
-    if (bot) {
-      bot.innerHTML =
-        '<span class="dot red"></span>Unavailable';
+  function render(data) {
+    if (!data || !data.authenticated) {
+      return;
     }
 
-    if (servers) {
-      servers.textContent = "—";
+    login.classList.add("hidden");
+    dash.classList.remove("hidden");
+    user.classList.remove("hidden");
+
+    const currentUser = data.user || {};
+
+    username.textContent =
+      currentUser.global_name ||
+      currentUser.username ||
+      "Discord User";
+
+    renderAvatar(currentUser);
+
+    const list = Array.isArray(data.servers)
+      ? data.servers
+      : [];
+
+    if (!list.length) {
+      servers.innerHTML =
+        '<div class="empty">No manageable RoZAG servers were found.</div>';
+      return;
     }
 
-    if (seen) {
-      seen.textContent = "—";
-    }
-    if (accounts) {
-      accounts.textContent = "—";
-    }
+    servers.innerHTML = list.map(function (guild) {
+      const iconUrl = guildIconUrl(guild);
 
-    ["youtube", "tiktok", "twitch", "kick"].forEach(function (platform) {
-      setPlatform(platform, {
-        status: "offline",
-        label: "Unavailable",
-        detail: "Status API could not be reached."
+      const iconHtml = iconUrl
+        ? '<img src="' + escapeHtml(iconUrl) +
+          '" alt="' + escapeHtml(guild.name || "Server") + '">'
+        : "🏴‍☠️";
+
+      return (
+        '<article class="server-card">' +
+          '<div class="server-head">' +
+            '<div class="guild-icon">' + iconHtml + '</div>' +
+            '<div class="server-meta">' +
+              '<h3>' + escapeHtml(guild.name || "Unnamed Server") + '</h3>' +
+              '<span class="online">RoZAG access available</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="btn primary manage" data-guild="' +
+            escapeHtml(String(guild.id || "")) +
+            '" type="button">Manage Server</button>' +
+        '</article>'
+      );
+    }).join("");
+
+    document.querySelectorAll(".manage").forEach(function (button) {
+      button.addEventListener("click", function () {
+        alert("Server management is the next test phase.");
       });
     });
   }
 
-  function normalisePayload(data) {
-    const platformSource =
-      data && data.platforms && typeof data.platforms === "object"
-        ? data.platforms
-        : {};
-
-    function platformValue(name) {
-      if (Object.prototype.hasOwnProperty.call(platformSource, name)) {
-        return normalisePlatform(platformSource[name]);
-      }
-
-      if (data && Object.prototype.hasOwnProperty.call(data, name)) {
-        return normalisePlatform(data[name]);
-      }
-
-      return normalisePlatform(false);
-    }
-
-    const botOnline = Boolean(
-      data && (
-        data.bot_online !== undefined
-          ? data.bot_online
-          : data.online
-      )
+  /*
+   * Logout now asks for confirmation so an accidental click
+   * cannot immediately end the session.
+   */
+  logoutBtn.addEventListener("click", function () {
+    const confirmed = window.confirm(
+      "Are you sure you want to sign out of the RoZAG Dashboard?"
     );
 
-    return {
-      botOnline: botOnline,
+    if (!confirmed) {
+      return;
+    }
 
-      servers:
-        data && data.server_count !== undefined
-          ? data.server_count
-          : data && data.servers !== undefined
-            ? data.servers
-            : "—",
+    window.location.href = logoutUrl;
+  });
 
-      accounts:
-        data && data.account_count !== undefined
-          ? data.account_count
-          : data && data.accounts_followed !== undefined
-            ? data.accounts_followed
-            : data && data.accounts !== undefined
-              ? data.accounts
-              : "—",
-
-      seen:
-        data && data.last_seen_human
-          ? data.last_seen_human
-          : data && data.last_heartbeat
-            ? data.last_heartbeat
-            : data && data.last_seen
-              ? data.last_seen
-              : "—",
-
-      youtube: platformValue("youtube"),
-      tiktok: platformValue("tiktok"),
-      twitch: platformValue("twitch"),
-      kick: platformValue("kick")
-    };
-  }
-
-  async function loadStatus() {
-    const url =
-      API_BASE_URL +
-      STATUS_PATH +
-      (STATUS_PATH.indexOf("?") >= 0 ? "&" : "?") +
-      "t=" +
-      Date.now();
-
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-          Accept: "application/json"
+  /*
+   * Fetch the authenticated dashboard session.
+   * credentials: include is required because the Flask session
+   * cookie belongs to the dashboard backend.
+   */
+  if (me) {
+    fetch(me, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+      headers: {
+        "Accept": "application/json"
+      }
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          return null;
         }
+        return response.json();
+      })
+      .then(render)
+      .catch(function (error) {
+        console.error("RoZAG dashboard session lookup failed:", error);
       });
-
-      if (!response.ok) {
-        throw new Error(
-          "Status API HTTP " + response.status
-        );
-      }
-
-      const contentType =
-        response.headers.get("content-type") || "";
-
-      if (
-        !contentType
-          .toLowerCase()
-          .includes("application/json")
-      ) {
-        throw new Error(
-          "Status API did not return JSON"
-        );
-      }
-
-      const raw = await response.json();
-      const data = normalisePayload(raw);
-
-      const bot = byId("bot");
-      const servers = byId("servers");
-      const seen = byId("seen");
-      const accounts = byId("accounts");
-
-      if (bot) {
-        bot.innerHTML =
-          '<span class="dot ' +
-          (data.botOnline ? "" : "red") +
-          '"></span>' +
-          (data.botOnline ? "Online" : "Offline");
-      }
-
-      if (servers) {
-        servers.textContent = data.servers;
-      }
-
-      if (seen) {
-        seen.textContent = data.seen;
-      }
-
-      if (accounts) {
-        accounts.textContent = data.accounts;
-      }
-
-      setPlatform("youtube", data.youtube);
-      setPlatform("tiktok", data.tiktok);
-      setPlatform("twitch", data.twitch);
-      setPlatform("kick", data.kick);
-
-      console.info(
-        "[RoZAG] Status API OK:",
-        API_BASE_URL + STATUS_PATH,
-        raw
-      );
-    } catch (error) {
-      console.error(
-        "[RoZAG] Status API failed:",
-        error
-      );
-
-      // Only show "Unavailable" when the API itself could not be read.
-      // A successfully returned false/Offline value must remain Offline.
-      setUnavailable();
-    }
-  }
-
-  function start() {
-    setExternalLinks();
-    loadStatus();
-
-    // Refresh every 15 seconds.
-    window.setInterval(
-      loadStatus,
-      15000
-    );
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener(
-      "DOMContentLoaded",
-      start
-    );
-  } else {
-    start();
   }
 })();
