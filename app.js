@@ -158,7 +158,6 @@
     if (seen) {
       seen.textContent = "—";
     }
-
     if (accounts) {
       accounts.textContent = "—";
     }
@@ -208,6 +207,15 @@
             ? data.servers
             : "—",
 
+      accounts:
+        data && data.account_count !== undefined
+          ? data.account_count
+          : data && data.accounts_followed !== undefined
+            ? data.accounts_followed
+            : data && data.accounts !== undefined
+              ? data.accounts
+              : "—",
+
       seen:
         data && data.last_seen_human
           ? data.last_seen_human
@@ -216,17 +224,6 @@
             : data && data.last_seen
               ? data.last_seen
               : "—",
-
-      accounts:
-        data && data.accounts_followed !== undefined
-          ? data.accounts_followed
-          : data && data.account_count !== undefined
-            ? data.account_count
-            : data && data.accounts !== undefined
-              ? data.accounts
-              : data && data.followed_accounts !== undefined
-                ? data.followed_accounts
-                : "—",
 
       youtube: platformValue("youtube"),
       tiktok: platformValue("tiktok"),
