@@ -85,7 +85,7 @@
       ? item.label
       : "Offline";
 
-    let cls = "off";
+    let cls = "red";
 
     if (status === "online") {
       cls = "";
@@ -102,10 +102,7 @@
   }
 
   function setPlatform(prefix, item) {
-    // Current index.html uses ids such as #youtube directly.
-    // Older markup used #youtube-status / #youtube-detail.
-    // Support both so the live status cannot get stuck on Checking....
-    const state = byId(prefix + "-status") || byId(prefix);
+    const state = byId(prefix + "-status");
     const detail = byId(prefix + "-detail");
 
     if (!state) return;
@@ -151,7 +148,7 @@
 
     if (bot) {
       bot.innerHTML =
-        '<span class="dot off"></span>Unavailable';
+        '<span class="dot red"></span>Unavailable';
     }
 
     if (servers) {
@@ -211,13 +208,6 @@
             ? data.servers
             : "—",
 
-      accounts:
-        data && data.account_count !== undefined
-          ? data.account_count
-          : data && data.accounts_followed !== undefined
-            ? data.accounts_followed
-            : "—",
-
       seen:
         data && data.last_seen_human
           ? data.last_seen_human
@@ -226,6 +216,17 @@
             : data && data.last_seen
               ? data.last_seen
               : "—",
+
+      accounts:
+        data && data.accounts_followed !== undefined
+          ? data.accounts_followed
+          : data && data.account_count !== undefined
+            ? data.account_count
+            : data && data.accounts !== undefined
+              ? data.accounts
+              : data && data.followed_accounts !== undefined
+                ? data.followed_accounts
+                : "—",
 
       youtube: platformValue("youtube"),
       tiktok: platformValue("tiktok"),
@@ -281,7 +282,7 @@
       if (bot) {
         bot.innerHTML =
           '<span class="dot ' +
-          (data.botOnline ? "" : "off") +
+          (data.botOnline ? "" : "red") +
           '"></span>' +
           (data.botOnline ? "Online" : "Offline");
       }
