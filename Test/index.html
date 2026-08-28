@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoZAG Social Hub</title>
+<meta name="description" content="RoZAG Social Hub connects Discord communities to creator feeds from YouTube, TikTok, Twitch and Kick.">
+<style>
+:root{
+  --bg:#06070a;--panel:#10131a;--panel2:#141821;--text:#f5f6f8;--muted:#a7adb8;
+  --red:#e21d2e;--red2:#ff4d43;--line:#292e39;--green:#3bd98b;--gold:#f2b63d;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 85% 0,#3d0b13 0,transparent 34%),linear-gradient(180deg,#08090d,#050609 70%);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1120px,92%);margin:auto}
+nav{position:sticky;top:0;z-index:20;background:#08090ddd;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.05em}.brand img{width:46px;height:46px;object-fit:contain}
+.navlinks{display:flex;gap:20px;color:#c7cad2;font-size:14px}.navlinks a:hover{color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:10px;border:1px solid #474d59;background:#191c24;font-weight:800;cursor:pointer}
+.primary{background:linear-gradient(135deg,var(--red),#9d1020);border-color:#ff4b55;box-shadow:0 12px 34px #d51a3030}
+.hero{padding:58px 0 34px}.grid{display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:center}
+.kicker{color:var(--gold);font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.hero h1{font-size:clamp(46px,7vw,78px);line-height:.95;letter-spacing:-.05em;margin:16px 0 22px}.hero h1 span{color:var(--red2)}
+.lead{font-size:19px;line-height:1.7;color:#c7cad2;max-width:720px}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.status{background:linear-gradient(160deg,#181b24,#0d1015);border:1px solid #303541;border-radius:22px;padding:26px;box-shadow:0 24px 80px #0009}
+.logo{width:145px;height:145px;display:block;object-fit:contain;margin:0 auto 14px}.status h2{text-align:center;margin:0}.status p{text-align:center;color:var(--muted);margin:6px 0 18px}
+.row{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-top:1px solid var(--line)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 14px #3bd98b}.dot.red{background:#e21d2e;box-shadow:0 0 14px #e21d2e}.dot.warn{background:var(--gold);box-shadow:0 0 14px #f2b63d}
+section{padding:38px 0 34px}.title{font-size:34px;margin:0 0 10px}.sub{color:var(--muted);line-height:1.7;max-width:760px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}.card,.panel{background:linear-gradient(180deg,#141720,#0d1015);border:1px solid var(--line);border-radius:18px;padding:26px}.card .ico{font-size:30px;margin-bottom:14px}.card h3{margin:0 0 8px}.card p{color:var(--muted);line-height:1.65;margin:0}.card small{font-size:11px;color:var(--green);letter-spacing:.08em;margin-left:5px}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel ul{color:#c8cbd3;line-height:1.9}.panel code{background:#1d212b;padding:2px 6px;border-radius:5px}
+.platform-status-wrap{margin-top:18px;background:linear-gradient(160deg,#151923,#0c0f14);border:1px solid var(--line);border-radius:18px;padding:4px 6px;overflow:hidden}.status-platforms{display:grid;grid-template-columns:repeat(4,1fr)}
+.platform-status{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;padding:14px 16px;border-right:1px solid var(--line)}.platform-status:last-child{border-right:0}
+.platform-name{display:flex;align-items:center;gap:10px;font-weight:900;font-size:16px}.platform-name svg{width:29px;height:29px;flex:0 0 29px}.state{font-weight:900;display:inline-flex;align-items:center;white-space:nowrap;font-size:14px}
+.share-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:18px}.share-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.share-btn{padding:13px 10px;border:1px solid var(--line);border-radius:10px;background:#11141b;font-weight:800;text-align:center}.share-btn:hover{border-color:#555d6c;background:#181c25}.copy-msg{min-height:20px;margin-top:10px;color:var(--green);font-size:13px}
+.social-section{padding-top:28px}.section-rule{display:flex;align-items:center;gap:16px;margin-bottom:22px}.section-rule:before,.section-rule:after{content:"";height:1px;background:linear-gradient(90deg,transparent,var(--red));flex:1}.section-rule:after{background:linear-gradient(90deg,var(--red),transparent)}.section-rule h2{font-size:25px;text-align:center;margin:0;white-space:nowrap}
+.social-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.social-card{background:linear-gradient(180deg,#12151c,#090b10);border:1px solid #343945;border-radius:15px;padding:16px 10px;text-align:center;transition:.18s ease}.social-card:hover{transform:translateY(-3px);border-color:var(--red);box-shadow:0 12px 30px #0007}.social-icon{width:62px;height:62px;margin:0 auto 10px;display:grid;place-items:center;border-radius:50%;border:2px solid var(--social);box-shadow:0 0 18px color-mix(in srgb,var(--social),transparent 70%);background:#090b0f;color:var(--social);font-size:25px;font-weight:1000}.social-card h3{margin:4px 0 3px;font-size:15px;color:var(--social)}.social-card p{margin:0 0 12px;color:#b7bcc6;font-size:12px}.social-card .follow{display:inline-flex;padding:8px 13px;border-radius:8px;border:1px solid #4b2025;background:#160d10;color:#fff;font-size:12px;font-weight:900}
+.tip{margin-top:18px;background:linear-gradient(100deg,#120b0e,#0c0e13);border:1px solid #68202a;border-radius:16px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:22px}.tip h3{margin:0 0 6px;color:var(--red2);font-size:25px}.tip p{margin:0;color:var(--muted)}.tip .btn{min-width:230px}
+footer{border-top:1px solid var(--line);padding:30px 0;color:#858b96}.foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.links{display:flex;gap:18px}
+@media(max-width:900px){.grid,.two,.share-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.social-grid{grid-template-columns:repeat(3,1fr)}.status-platforms{grid-template-columns:repeat(2,1fr)}.platform-status:nth-child(2){border-right:0}.platform-status:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:600px){.navlinks{display:none}.hero{padding-top:38px}.cards{grid-template-columns:1fr}.social-grid{grid-template-columns:repeat(2,1fr)}.status-platforms{grid-template-columns:1fr}.platform-status{border-right:0!important;border-bottom:1px solid var(--line)}.platform-status:last-child{border-bottom:0}.share-actions{grid-template-columns:1fr 1fr}.tip{align-items:flex-start;flex-direction:column}.tip .btn{width:100%}.section-rule h2{font-size:20px;white-space:normal}}
+</style>
+</head>
+<body>
+<nav><div class="wrap nav">
+  <a class="brand" href="#"><img src="rozag-logo.png" alt="RoZAG"><span>ROZAG SOCIAL HUB</span></a>
+  <div class="navlinks"><a href="#features">Features</a><a href="#about">About</a><a href="#status">Status</a><a href="#support">Support</a><a href="terms/" target="_blank" rel="noopener noreferrer">Terms</a><a href="privacy/" target="_blank" rel="noopener noreferrer">Privacy</a></div>
+  <a id="install" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Add to Discord</a>
+</div></nav>
+
+<header class="hero"><div class="wrap grid">
+  <div><div class="kicker">One crew. One hub. Every feed.</div><h1>Social feeds,<br><span>built for Discord.</span></h1>
+    <p class="lead">RoZAG Social Hub connects your Discord community to creator feeds from YouTube, TikTok, Twitch and Kick — automatically creating the channels, handling authorizations and delivering new content where your community can see it. Creator Watch lets a server follow external creators who are not Discord members.</p>
+    <div class="actions"><a id="install2" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">Add RoZAG to Discord</a><a class="btn" href="#features">Explore the Hub</a></div>
+  </div>
+  <div class="status" id="status"><img class="logo" src="rozag-logo.png" alt="RoZAG Social Hub"><h2>RoZAG Social Hub</h2><p>Live system status</p>
+    <div class="row"><span>Discord Bot</span><strong id="bot">Checking…</strong></div>
+    <div class="row"><span>Servers connected</span><strong id="servers">—</strong></div>
+    <div class="row"><span>Accounts followed</span><strong id="accounts">—</strong></div>
+    <div class="row"><span>Last heartbeat</span><strong id="seen">—</strong></div>
+    <div style="margin-top:12px;color:var(--muted);font-size:13px">Platform status updates automatically.</div>
+  </div>
+</div></header>
+
+<section id="status"><div class="wrap"><h2 class="title">Live platform status</h2><p class="sub">Each integration reports independently so the status stays useful and honest.</p>
+  <div class="platform-status-wrap"><div class="status-platforms">
+    <a class="platform-status" href="https://www.youtube.com/@cptredbeardx69" target="_blank" rel="noopener noreferrer"><span class="platform-name"><svg viewBox="0 0 48 34" aria-hidden="true"><rect x="1" y="1" width="46" height="32" rx="9" fill="#fff"/><path d="M20 9l13 8-13 8z" fill="#e21d2e"/></svg>YouTube</span><strong class="state" id="youtube-status"><span class="dot red"></span>Checking…</strong></a>
+    <a class="platform-status" href="https://www.tiktok.com/@cptredbeardx69" target="_blank" rel="noopener noreferrer"><span class="platform-name"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M29 6c2 6 5 9 11 10v7c-4 0-8-1-11-3v13c0 7-5 11-12 11-7 0-12-4-12-10 0-7 6-11 13-10v7c-4-1-6 0-6 3 0 2 2 3 5 3 3 0 5-2 5-6V6z" fill="#fff"/></svg>TikTok</span><strong class="state" id="tiktok-status"><span class="dot red"></span>Checking…</strong></a>
+    <a class="platform-status" href="https://www.twitch.tv/cptredbeardx69" target="_blank" rel="noopener noreferrer"><span class="platform-name"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 4h36v25l-10 9h-8l-7 6v-6H6z" fill="#fff"/><path d="M17 14h5v11h-5zm10 0h5v11h-5z" fill="#7c4dff"/></svg>Twitch</span><strong class="state" id="twitch-status"><span class="dot red"></span>Checking…</strong></a>
+    <a class="platform-status" href="https://kick.com/cptredbeardx69" target="_blank" rel="noopener noreferrer"><span class="platform-name"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="7" width="40" height="34" rx="6" fill="#fff"/><path d="M13 12h7v9l8-9h9L27 24l11 12h-9l-9-9v9h-7z" fill="#4dff3b"/></svg>Kick</span><strong class="state" id="kick-status"><span class="dot red"></span>Checking…</strong></a>
+  </div></div>
+</div></section>
+
+<section id="features"><div class="wrap"><h2 class="title">Everything in one Social Hub</h2><p class="sub">A single Discord app for community social-feed automation.</p><div class="cards">
+  <article class="card"><div class="ico">🎬</div><h3>YouTube <small>ACTIVE</small></h3><p>Monitor registered YouTube channels and deliver new uploads automatically into each server's YouTube feed.</p></article>
+  <article class="card"><div class="ico">🎵</div><h3>TikTok <small>ACTIVE</small></h3><p>Creators authorize through TikTok's official OAuth flow, then RoZAG polls for new public videos and delivers them to Discord.</p></article>
+  <article class="card"><div class="ico">📺</div><h3>Twitch <small>ACTIVE</small></h3><p>Connect creators and receive live alerts through Twitch EventSub, with a 60-second polling safety net for delivery.</p></article>
+  <article class="card"><div class="ico">🟢</div><h3>Kick <small>ACTIVE</small></h3><p>Kick live alerts use the official Events API webhook with a 60-second public-stream polling safety net.</p></article>
+  <article class="card"><div class="ico">📸</div><h3>Instagram <small>COMING SOON</small></h3><p>Instagram integration is planned for a future RoZAG release.</p></article>
+  <article class="card"><div class="ico">𝕏</div><h3>X / Twitter <small>COMING SOON</small></h3><p>X integration is planned for a future RoZAG release.</p></article>
+</div></div></section>
+
+<section id="about"><div class="wrap two">
+  <div class="panel"><h2 class="title">Made for RoZAG</h2><p class="sub">RoZAG Social Hub is a multi-server Discord application built to automate creator feeds without making server admins manage separate platform bots.</p><ul>
+    <li>Automatic Social Hub and platform-channel setup</li><li>YouTube, TikTok, Twitch and Kick feeds in one Discord app</li><li>Creator Watch for creators who are not Discord members</li><li>Per-server feed delivery and independent creator connections</li><li>TikTok authorization through the official OAuth flow</li><li>Twitch live detection with EventSub plus a 60-second delivery safety net</li><li>Kick live-event integration with OAuth 2.1 + webhook delivery</li><li>Instagram and X / Twitter planned as future integrations</li>
+  </ul></div>
+  <div class="panel"><h2 class="title">Simple administration</h2><p class="sub">Server admins manage the Social Hub directly from Discord. RoZAG handles the platform-side plumbing in the background.</p><ul>
+    <li><code>/setup_social_hub</code> — create or repair the Social Hub</li><li><code>/social add</code> — add a YouTube, TikTok, Twitch or Kick creator</li><li><code>/social list</code> — view connected accounts</li><li><code>/social remove</code> — remove an account</li><li><code>/creator watch</code> — follow an external creator without requiring Discord membership</li><li><code>/creator list</code> — view Creator Watch entries</li><li><code>/creator unwatch</code> — stop watching a creator</li>
+  </ul></div>
+</div></section>
+
+<section><div class="wrap share-grid">
+  <div class="panel"><h2 class="title">Share RoZAG</h2><p class="sub">Know a creator or Discord community that could use automated social feeds? Share the Social Hub with them.</p>
+    <div class="share-actions"><a class="share-btn" href="https://discord.com/channels/@me" target="_blank" rel="noopener noreferrer">Discord</a><a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fredbeardx69x.github.io%2Frozag-social-feed%2F" target="_blank" rel="noopener noreferrer">Facebook</a><a class="share-btn" href="https://x.com/intent/post?url=https%3A%2F%2Fredbeardx69x.github.io%2Frozag-social-feed%2F&text=Check%20out%20RoZAG%20Social%20Hub" target="_blank" rel="noopener noreferrer">X</a><a class="share-btn" href="https://www.reddit.com/submit?url=https%3A%2F%2Fredbeardx69x.github.io%2Frozag-social-feed%2F&title=RoZAG%20Social%20Hub" target="_blank" rel="noopener noreferrer">Reddit</a><a class="share-btn" href="https://wa.me/?text=RoZAG%20Social%20Hub%20https%3A%2F%2Fredbeardx69x.github.io%2Frozag-social-feed%2F" target="_blank" rel="noopener noreferrer">WhatsApp</a><button class="share-btn" id="copy-link" type="button">Copy link</button></div><div id="copy-msg" class="copy-msg"></div>
+  </div>
+  <div class="panel"><h2 class="title">Built for communities</h2><p class="sub">One Discord app for creator feeds, authorizations, Creator Watch and per-server delivery.</p><div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap"><a class="btn primary" data-install-link href="#">Add RoZAG to Discord</a><a class="btn" data-support-link href="#">RoZAG Support</a></div></div>
+</div></section>
+
+<section id="support" class="social-section"><div class="wrap">
+  <div class="section-rule"><h2>Support the Creator on His Socials</h2></div>
+  <div class="social-grid">
+    <a class="social-card" style="--social:#ff313d" href="https://www.youtube.com/@cptredbeardx69" target="_blank" rel="noopener noreferrer"><div class="social-icon">▶</div><h3>YOUTUBE</h3><p>@cptredbeardx69</p><span class="follow">Subscribe</span></a>
+    <a class="social-card" style="--social:#21e6e0" href="https://www.tiktok.com/@cptredbeardx69" target="_blank" rel="noopener noreferrer"><div class="social-icon">♪</div><h3>TIKTOK</h3><p>@cptredbeardx69</p><span class="follow">Follow</span></a>
+    <a class="social-card" style="--social:#9b6cff" href="https://www.twitch.tv/cptredbeardx69" target="_blank" rel="noopener noreferrer"><div class="social-icon">◈</div><h3>TWITCH</h3><p>@cptredbeardx69</p><span class="follow">Follow</span></a>
+    <a class="social-card" style="--social:#63ff39" href="https://kick.com/cptredbeardx69" target="_blank" rel="noopener noreferrer"><div class="social-icon">K</div><h3>KICK</h3><p>@cptredbeardx69</p><span class="follow">Follow</span></a>
+    <a class="social-card" style="--social:#ff704d" href="https://www.instagram.com/red.beardx69x" target="_blank" rel="noopener noreferrer"><div class="social-icon">◎</div><h3>INSTAGRAM</h3><p>@red.beardx69x</p><span class="follow">Follow</span></a>
+    <a class="social-card" style="--social:#f5f6f8" href="https://x.com/RedBeardx69x" target="_blank" rel="noopener noreferrer"><div class="social-icon">𝕏</div><h3>X / TWITTER</h3><p>@RedBeardx69x</p><span class="follow">Follow</span></a>
+  </div>
+  <div class="tip"><div><h3>❤️ Love the content?</h3><p>Support the creator and help keep the content coming.</p></div><a class="btn primary" href="https://streamelements.com/cptredbeardx69-10b4b/tip" target="_blank" rel="noopener noreferrer">Tip the Creator</a></div>
+</div></section>
+
+<footer><div class="wrap foot"><span>© 2026 RoZAG Social Hub — Built for multi-server Discord communities.</span><span class="links"><a href="terms/" target="_blank" rel="noopener noreferrer">Terms of Service</a><a href="privacy/" target="_blank" rel="noopener noreferrer">Privacy Policy</a><a href="https://discord.gg/rJFUWAGWHH" target="_blank" rel="noopener noreferrer">RoZAG Discord Support</a></span></div></footer>
+
+<script src="config.js"></script><script src="app.js"></script>
+<script>
+(function(){
+  const copy=document.getElementById('copy-link');
+  const msg=document.getElementById('copy-msg');
+  if(copy){copy.addEventListener('click',async function(){
+    try{await navigator.clipboard.writeText(window.location.href);msg.textContent='Link copied to clipboard.';}
+    catch(e){msg.textContent='Copy is unavailable in this browser — copy the page URL from the address bar.';}
+    setTimeout(()=>{msg.textContent='';},3000);
+  });}
+})();
+</script>
+</body>
+</html>
