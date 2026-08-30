@@ -1,221 +1,367 @@
-(function () {
-  "use strict";
+import os
+import secrets
+from functools import wraps
+from urllib.parse import urlencode
 
-  const cfg = window.ROZAG_DASHBOARD_CONFIG || {};
-  const auth = cfg.AUTH_START_URL || "#";
-  const me = cfg.AUTH_ME_URL || "";
-  const logoutUrl = cfg.LOGOUT_URL || "./";
+import requests
+from flask import Flask, jsonify, redirect, request, session
+from flask_cors import CORS
 
-  const login = document.getElementById("login");
-  const dash = document.getElementById("dashboard");
-  const user = document.getElementById("user");
-  const servers = document.getElementById("servers");
+app = Flask(__name__)
 
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logout");
+# Dashboard test credentials: /dashboard/var/.VARIABLE_NAME
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+VAR_DIR = os.path.join(BASE_DIR, "var")
 
-  if (loginBtn) loginBtn.href = auth;
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", function () {
-      if (window.confirm("Are you sure you want to sign out of the RoZAG Dashboard?")) {
-        window.location.href = logoutUrl;
-      }
-    });
-  }
+def read_var_file(name, default=""):
+    try:
+        with open(os.path.join(VAR_DIR, f".{name}"), "r", encoding="utf-8") as f:
+            return f.read().strip()
+    except (FileNotFoundError, OSError):
+        return default
 
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, function (c) {
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
-  }
 
-  function guildIconUrl(guild) {
-    if (!guild || !guild.id || !guild.icon) return "";
-    return "https://cdn.discordapp.com/icons/" +
-      encodeURIComponent(guild.id) + "/" +
-      encodeURIComponent(guild.icon) + ".png?size=128";
-  }
+def setting(name, default=""):
+    value = os.environ.get(name)
+    return value.strip() if value else read_var_file(name, default)
 
-  function renderGuildIcon(guild) {
-    const url = guildIconUrl(guild);
-    return url
-      ? '<img src="' + url + '" alt="" class="guild-icon-img">'
-      : '<span class="guild-icon-fallback">⚓</span>';
-  }
 
-  function addStyles() {
-    if (document.getElementById("rozag-phase2-styles")) return;
-    const style = document.createElement("style");
-    style.id = "rozag-phase2-styles";
-    style.textContent = `
-      .server-card .manage{transition:transform .16s ease,filter .16s ease}
-      .server-card .manage:hover{transform:translateY(-1px);filter:brightness(1.08)}
-      .guild-icon-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
-      .guild-icon-fallback{font-size:24px}
-      .server-modal-backdrop{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)}
-      .server-modal{width:min(900px,100%);max-height:min(820px,92vh);overflow:auto;background:linear-gradient(180deg,#151923,#0d1015);border:1px solid #343a47;border-radius:20px;box-shadow:0 30px 100px rgba(0,0,0,.65)}
-      .server-modal-head{display:flex;align-items:center;gap:16px;padding:24px;border-bottom:1px solid #292e39}
-      .server-modal-icon{width:64px;height:64px;flex:0 0 64px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:#202530;border:1px solid #3a404d;font-size:28px}
-      .server-modal-title{flex:1}.server-modal-title h2{margin:0 0 5px;font-size:28px}.server-modal-title p{margin:0;color:#a7adb8}
-      .server-modal-close{border:1px solid #474d59;background:#191c24;color:#f5f6f8;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:22px}
-      .server-modal-body{padding:24px}
-      .server-status-banner{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid #294536;border-radius:12px;background:rgba(59,217,139,.06);color:#bfe9d0;margin-bottom:20px}
-      .server-status-dot{width:10px;height:10px;border-radius:50%;background:#3bd98b;box-shadow:0 0 14px rgba(59,217,139,.7)}
-      .server-overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
-      .server-stat{background:#11151c;border:1px solid #292e39;border-radius:14px;padding:16px}
-      .server-stat-label{color:#8f96a3;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin-bottom:7px}
-      .server-stat-value{font-size:17px;font-weight:850}
-      .server-section{border:1px solid #292e39;background:#10131a;border-radius:16px;padding:20px;margin-top:14px}
-      .server-section h3{margin:0 0 6px;font-size:20px}.server-section p{margin:0;color:#a7adb8;line-height:1.6}
-      .readonly-pill{display:inline-flex;margin-top:14px;padding:7px 10px;border-radius:999px;border:1px solid #604d20;color:#f2b63d;background:rgba(242,182,61,.06);font-size:12px;font-weight:850}
-      .integration-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
-      .integration-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:11px;background:#151923;border:1px solid #292e39}
-      .integration-name{font-weight:800}.integration-state{color:#3bd98b;font-size:12px;font-weight:850}
-      @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
-    `;
-    document.head.appendChild(style);
-  }
+app.secret_key = setting("DASHBOARD_SESSION_SECRET", secrets.token_urlsafe(64))
 
-  function closeModal() {
-    const modal = document.getElementById("server-management-modal");
-    if (modal) modal.remove();
-    document.body.style.overflow = "";
-  }
+FRONTEND_URL = setting(
+    "DASHBOARD_FRONTEND_URL",
+    "https://redbeardx69x.github.io/rozag-social-feed/rozag-dashboard-test/",
+).rstrip("/")
 
-  function openServerManagement(guild) {
-    if (!guild) return;
-    closeModal();
+OAUTH_REDIRECT_URI = setting(
+    "DISCORD_REDIRECT_URI",
+    "https://rozag.coolvetspaces.com/dashboard/callback",
+)
 
-    const modal = document.createElement("div");
-    modal.id = "server-management-modal";
-    modal.className = "server-modal-backdrop";
+DISCORD_CLIENT_ID = setting("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = setting("DISCORD_CLIENT_SECRET")
 
-    const access = guild.owner
-      ? "Server Owner"
-      : (guild.administrator ? "Administrator" : "Manage Server");
+DISCORD_API = "https://discord.com/api/v10"
+DISCORD_AUTHORIZE = f"{DISCORD_API}/oauth2/authorize"
+DISCORD_TOKEN = f"{DISCORD_API}/oauth2/token"
+DISCORD_ME = f"{DISCORD_API}/users/@me"
+DISCORD_GUILDS = f"{DISCORD_API}/users/@me/guilds"
 
-    modal.innerHTML = `
-      <div class="server-modal" role="dialog" aria-modal="true">
-        <div class="server-modal-head">
-          <div class="server-modal-icon">${renderGuildIcon(guild)}</div>
-          <div class="server-modal-title">
-            <h2>${escapeHtml(guild.name || "Unnamed Server")}</h2>
-            <p>RoZAG server management</p>
-          </div>
-          <button class="server-modal-close" type="button" aria-label="Close">×</button>
-        </div>
-        <div class="server-modal-body">
-          <div class="server-status-banner">
-            <span class="server-status-dot"></span>
-            <strong>RoZAG access available</strong>
-            <span>•</span><span>Read-only test phase</span>
-          </div>
+ADMINISTRATOR = 0x8
+MANAGE_GUILD = 0x20
 
-          <div class="server-overview-grid">
-            <div class="server-stat">
-              <div class="server-stat-label">Server access</div>
-              <div class="server-stat-value">${escapeHtml(access)}</div>
-            </div>
-            <div class="server-stat">
-              <div class="server-stat-label">Server ID</div>
-              <div class="server-stat-value">${escapeHtml(guild.id || "Unknown")}</div>
-            </div>
-            <div class="server-stat">
-              <div class="server-stat-label">RoZAG status</div>
-              <div class="server-stat-value">Connected</div>
-            </div>
-          </div>
+CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": [FRONTEND_URL],
+            "supports_credentials": True,
+        }
+    },
+)
 
-          <div class="server-section">
-            <h3>Social Integrations</h3>
-            <p>Platform availability is displayed here only. No settings or accounts are changed in this phase.</p>
-            <div class="integration-list">
-              <div class="integration-row"><span class="integration-name">YouTube</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">TikTok</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">Twitch</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">Kick</span><span class="integration-state">Available</span></div>
-            </div>
-            <span class="readonly-pill">READ-ONLY • NO SETTINGS CHANGED</span>
-          </div>
+app.config.update(
+    SESSION_COOKIE_NAME="rozag_dashboard_test",
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="None",
+    SESSION_COOKIE_PATH="/",
+)
 
-          <div class="server-section">
-            <h3>Social Hub</h3>
-            <p>The next phase will show this server's connected creator accounts, feed configuration and delivery settings.</p>
-          </div>
 
-          <div class="server-section">
-            <h3>Bot &amp; Health</h3>
-            <p>Connection and heartbeat controls will be added after the read-only server view is validated.</p>
-          </div>
-        </div>
-      </div>
-    `;
+def login_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if not session.get("discord_user"):
+            return jsonify(
+                {"authenticated": False, "error": "not_authenticated"}
+            ), 401
+        return fn(*args, **kwargs)
 
-    document.body.appendChild(modal);
-    document.body.style.overflow = "hidden";
+    return wrapper
 
-    modal.querySelector(".server-modal-close").addEventListener("click", closeModal);
-    modal.addEventListener("click", function (event) {
-      if (event.target === modal) closeModal();
-    });
-  }
 
-  function render(data) {
-    if (!data || !data.authenticated) return;
-
-    if (login) login.classList.add("hidden");
-    if (dash) dash.classList.remove("hidden");
-    if (user) user.classList.remove("hidden");
-
-    const displayName = data.user?.global_name || data.user?.username || "Discord User";
-    const username = document.getElementById("username");
-    const avatar = document.getElementById("avatar");
-
-    if (username) username.textContent = displayName;
-    if (avatar) avatar.textContent = (data.user?.username || displayName || "D").slice(0, 1).toUpperCase();
-
-    const list = Array.isArray(data.servers)
-      ? data.servers
-      : (Array.isArray(data.guilds) ? data.guilds : []);
-
-    if (!servers) return;
-
-    if (!list.length) {
-      servers.innerHTML = '<div class="empty">No manageable RoZAG servers were found.</div>';
-      return;
+def discord_headers(token):
+    return {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
     }
 
-    servers.innerHTML = list.map(function (guild) {
-      return `
-        <article class="server-card">
-          <div class="server-head">
-            <div class="guild-icon">${renderGuildIcon(guild)}</div>
-            <div class="server-meta">
-              <h3>${escapeHtml(guild.name || "Unnamed Server")}</h3>
-              <span class="online">RoZAG access available</span>
-            </div>
-          </div>
-          <button class="btn primary manage" type="button">Manage Server</button>
-        </article>
-      `;
-    }).join("");
 
-    servers.querySelectorAll(".manage").forEach(function (button, index) {
-      button.addEventListener("click", function () {
-        openServerManagement(list[index]);
-      });
-    });
-  }
+def get_manageable_guilds(token):
+    response = requests.get(
+        DISCORD_GUILDS,
+        headers=discord_headers(token),
+        timeout=15,
+    )
 
-  addStyles();
+    if response.status_code == 401:
+        return None, 401
 
-  if (me) {
-    fetch(me, {credentials:"include", cache:"no-store"})
-      .then(function (response) { return response.ok ? response.json() : null; })
-      .then(render)
-      .catch(function (error) {
-        console.error("RoZAG dashboard session check failed:", error);
-      });
-  }
-})();
+    if not response.ok:
+        return None, response.status_code
+
+    manageable = []
+
+    for guild in response.json():
+        try:
+            permissions = int(guild.get("permissions", "0"))
+        except (TypeError, ValueError):
+            permissions = 0
+
+        admin = bool(permissions & ADMINISTRATOR)
+        manage = bool(permissions & MANAGE_GUILD)
+
+        if admin or manage:
+            manageable.append(
+                {
+                    "id": guild.get("id"),
+                    "name": guild.get("name"),
+                    "icon": guild.get("icon"),
+                    "owner": bool(guild.get("owner")),
+                    "administrator": admin,
+                    "manage_guild": manage,
+                }
+            )
+
+    manageable.sort(key=lambda x: (x.get("name") or "").lower())
+    return manageable, 200
+
+
+@app.get("/")
+def root():
+    return "RoZAG Dashboard TEST backend is running."
+
+
+@app.get("/health")
+def health():
+    return jsonify(
+        {
+            "ok": True,
+            "service": "rozag-dashboard-test",
+            "discord_oauth_configured": bool(
+                DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET
+            ),
+        }
+    )
+
+
+@app.get("/login")
+def login():
+    if not DISCORD_CLIENT_ID or not DISCORD_CLIENT_SECRET:
+        return jsonify(
+            {"ok": False, "error": "discord_oauth_not_configured"}
+        ), 500
+
+    state = secrets.token_urlsafe(32)
+    session["oauth_state"] = state
+
+    params = {
+        "client_id": DISCORD_CLIENT_ID,
+        "response_type": "code",
+        "redirect_uri": OAUTH_REDIRECT_URI,
+        "scope": "identify guilds",
+        "state": state,
+        "prompt": "consent",
+    }
+
+    return redirect(f"{DISCORD_AUTHORIZE}?{urlencode(params)}")
+
+
+@app.get("/callback")
+def callback():
+    if request.args.get("error"):
+        return redirect(f"{FRONTEND_URL}/?oauth_error=discord_denied")
+
+    code = request.args.get("code")
+    state = request.args.get("state")
+    expected = session.pop("oauth_state", None)
+
+    if (
+        not code
+        or not state
+        or not expected
+        or not secrets.compare_digest(state, expected)
+    ):
+        return redirect(f"{FRONTEND_URL}/?oauth_error=invalid_oauth_state")
+
+    response = requests.post(
+        DISCORD_TOKEN,
+        data={
+            "client_id": DISCORD_CLIENT_ID,
+            "client_secret": DISCORD_CLIENT_SECRET,
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": OAUTH_REDIRECT_URI,
+        },
+        headers={"Accept": "application/json"},
+        timeout=15,
+    )
+
+    if not response.ok:
+        app.logger.error(
+            "Discord token exchange failed: HTTP %s",
+            response.status_code,
+        )
+        return redirect(f"{FRONTEND_URL}/?oauth_error=token_exchange_failed")
+
+    token = response.json().get("access_token")
+
+    if not token:
+        return redirect(f"{FRONTEND_URL}/?oauth_error=no_access_token")
+
+    me = requests.get(
+        DISCORD_ME,
+        headers=discord_headers(token),
+        timeout=15,
+    )
+
+    if not me.ok:
+        return redirect(f"{FRONTEND_URL}/?oauth_error=user_lookup_failed")
+
+    user = me.json()
+
+    session["discord_user"] = {
+        "id": user.get("id"),
+        "username": user.get("username"),
+        "global_name": user.get("global_name"),
+        "avatar": user.get("avatar"),
+    }
+
+    session["discord_access_token"] = token
+
+    return redirect(FRONTEND_URL + "/")
+
+
+@app.get("/logout")
+def logout():
+    session.clear()
+    return redirect(FRONTEND_URL + "/")
+
+
+@app.get("/api/session")
+def api_session():
+    if not session.get("discord_user"):
+        return jsonify({"authenticated": False})
+
+    return jsonify(
+        {
+            "authenticated": True,
+            "user": session["discord_user"],
+        }
+    )
+
+
+@app.get("/api/me")
+@login_required
+def api_me():
+    token = session.get("discord_access_token")
+
+    if not token:
+        session.clear()
+        return jsonify({"authenticated": False}), 401
+
+    manageable, status = get_manageable_guilds(token)
+
+    if manageable is None:
+        if status == 401:
+            session.clear()
+            return jsonify({"authenticated": False}), 401
+
+        return jsonify(
+            {"error": "discord_guild_lookup_failed"}
+        ), status
+
+    return jsonify(
+        {
+            "authenticated": True,
+            "user": session["discord_user"],
+            "servers": manageable,
+            "server_count": len(manageable),
+            "phase": 2,
+            "read_only": True,
+        }
+    )
+
+
+@app.get("/api/server/<guild_id>")
+@login_required
+def api_server(guild_id):
+    """
+    Phase 2 server-detail endpoint.
+
+    This endpoint verifies that the logged-in Discord user can manage
+    the requested server before returning its basic Discord metadata.
+
+    It intentionally does NOT modify Discord or RoZAG configuration.
+    """
+
+    token = session.get("discord_access_token")
+
+    if not token:
+        session.clear()
+        return jsonify({"authenticated": False}), 401
+
+    manageable, status = get_manageable_guilds(token)
+
+    if manageable is None:
+        if status == 401:
+            session.clear()
+            return jsonify({"authenticated": False}), 401
+
+        return jsonify(
+            {"error": "discord_guild_lookup_failed"}
+        ), status
+
+    guild = next(
+        (g for g in manageable if str(g.get("id")) == str(guild_id)),
+        None,
+    )
+
+    if guild is None:
+        return jsonify(
+            {
+                "error": "server_not_found",
+                "message": "You do not have management access to this server.",
+            }
+        ), 403
+
+    return jsonify(
+        {
+            "authenticated": True,
+            "phase": 2,
+            "read_only": True,
+            "server": {
+                "id": guild.get("id"),
+                "name": guild.get("name"),
+                "icon": guild.get("icon"),
+                "owner": guild.get("owner"),
+                "administrator": guild.get("administrator"),
+                "manage_guild": guild.get("manage_guild"),
+                "access": (
+                    "Server Owner"
+                    if guild.get("owner")
+                    else (
+                        "Administrator"
+                        if guild.get("administrator")
+                        else "Manage Server"
+                    )
+                ),
+                "rozag_status": "Connected",
+            },
+            "social_integrations": {
+                "youtube": {"available": True, "state": "Available"},
+                "tiktok": {"available": True, "state": "Available"},
+                "twitch": {"available": True, "state": "Available"},
+                "kick": {"available": True, "state": "Available"},
+            },
+        }
+    )
+
+
+if __name__ == "__main__":
+    app.run(
+        host="127.0.0.1",
+        port=int(os.environ.get("PORT", "8080")),
+    )
