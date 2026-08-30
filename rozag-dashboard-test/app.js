@@ -852,6 +852,25 @@
 
   addStyles();
 
+  // The dashboard page may still contain the old static Phase 4
+  // management block below the footer. The real management UI is
+  // now opened as a modal from each server card, so hide only that
+  // legacy block. Do not affect the main dashboard or modal.
+  function hideLegacyManageBlock() {
+    document.querySelectorAll("h1,h2,h3,h4").forEach(function (heading) {
+      if (heading.textContent.trim() !== "Manage RoZAG") return;
+
+      const block =
+        heading.closest("section") ||
+        heading.closest("article") ||
+        heading.parentElement;
+
+      if (block) block.style.display = "none";
+    });
+  }
+
+  hideLegacyManageBlock();
+
   if (me) {
     fetch(me, {
       credentials: "include",
