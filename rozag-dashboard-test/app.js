@@ -72,17 +72,6 @@
       .integration-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
       .integration-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:11px;background:#151923;border:1px solid #292e39}
       .integration-name{font-weight:800}.integration-state{color:#3bd98b;font-size:12px;font-weight:850}
-
-      .social-account-list{display:grid;gap:10px;margin-top:16px}
-      .social-account-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border-radius:12px;background:#151923;border:1px solid #292e39}
-      .social-account-main{min-width:0}
-      .social-account-creator{font-weight:850}
-      .social-account-platform{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#8f96a3;margin-top:3px}
-      .social-account-name{color:#c9ced8;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .social-account-link{color:#f2b63d;text-decoration:none;font-size:12px;font-weight:850;white-space:nowrap}
-      .social-account-link:hover{text-decoration:underline}
-      .social-empty{color:#a7adb8;padding:14px 0}
-      .social-hub-error{color:#ff8f8f;padding:12px 0}
       @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
     `;
     document.head.appendChild(style);
@@ -92,76 +81,6 @@
     const modal = document.getElementById("server-management-modal");
     if (modal) modal.remove();
     document.body.style.overflow = "";
-  }
-
-
-  async function loadSocialHub(guild, modal) {
-    const loading = modal.querySelector(".social-hub-loading");
-    const box = modal.querySelector(".social-hub-data");
-
-    if (!box || !guild || !guild.id) return;
-
-    try {
-      const response = await fetch(
-        "https://rozag.coolvetspaces.com/dashboard/api/server/" +
-          encodeURIComponent(String(guild.id)) +
-          "/social",
-        {
-          credentials: "include",
-          cache: "no-store"
-        }
-      );
-
-      const data = await response.json().catch(function () {
-        return null;
-      });
-
-      if (!response.ok || !data || !data.ok) {
-        throw new Error("Social Hub request failed");
-      }
-
-      if (loading) loading.remove();
-
-      const accounts = Array.isArray(data.accounts) ? data.accounts : [];
-
-      if (!accounts.length) {
-        box.innerHTML =
-          '<div class="social-empty">No connected creator accounts are currently associated with this server.</div>';
-        return;
-      }
-
-      box.innerHTML =
-        '<div class="social-account-list">' +
-        accounts.map(function (account) {
-          const profile = account.profile_url
-            ? '<a class="social-account-link" href="' +
-              escapeHtml(account.profile_url) +
-              '" target="_blank" rel="noopener noreferrer">View profile</a>'
-            : "";
-
-          return '<div class="social-account-row">' +
-            '<div class="social-account-main">' +
-              '<div class="social-account-creator">' +
-                escapeHtml(account.creator || "Unknown creator") +
-              '</div>' +
-              '<div class="social-account-platform">' +
-                escapeHtml(account.platform || "Unknown platform") +
-              '</div>' +
-              '<div class="social-account-name">' +
-                escapeHtml(account.username || account.channel_id || "Connected account") +
-              '</div>' +
-            '</div>' +
-            profile +
-          '</div>';
-        }).join("") +
-        '</div>';
-
-    } catch (error) {
-      console.error("RoZAG Phase 3A Social Hub error:", error);
-      if (loading) loading.remove();
-      box.innerHTML =
-        '<div class="social-hub-error">Unable to load Social Hub data right now.</div>';
-    }
   }
 
   function openServerManagement(guild) {
@@ -222,8 +141,7 @@
 
           <div class="server-section">
             <h3>Social Hub</h3>
-            <p class="social-hub-loading">Loading connected creator accounts…</p>
-            <div class="social-hub-data"></div>
+            <p>The next phase will show this server's connected creator accounts, feed configuration and delivery settings.</p>
           </div>
 
           <div class="server-section">
@@ -236,8 +154,6 @@
 
     document.body.appendChild(modal);
     document.body.style.overflow = "hidden";
-
-    loadSocialHub(guild, modal);
 
     modal.querySelector(".server-modal-close").addEventListener("click", closeModal);
     modal.addEventListener("click", function (event) {
