@@ -1,26 +1,10 @@
 (function () {
   "use strict";
 
-  /*
-   * RoZAG Dashboard Phase 3
-   *
-   * IMPORTANT DATA RULE:
-   *   Connected accounts come from /api/server/<guild_id>
-   *   and the backend's guild_social_accounts -> social_accounts -> creators
-   *   relationship.
-   *
-   *   guild_platforms is displayed only as feed-routing information.
-   *   It is NOT used to decide whether Instagram/X/etc. are connected.
-   */
-
   const cfg = window.ROZAG_DASHBOARD_CONFIG || {};
   const auth = cfg.AUTH_START_URL || "#";
   const me = cfg.AUTH_ME_URL || "";
-  const serverApiBase =
-    cfg.SERVER_API_BASE_URL ||
-    (me
-      ? me.replace(/\/api\/me\/?$/, "/api/server/")
-      : "");
+  const logoutUrl = cfg.LOGOUT_URL || "./";
 
   const login = document.getElementById("login");
   const dash = document.getElementById("dashboard");
@@ -28,865 +12,294 @@
   const servers = document.getElementById("servers");
 
   const loginBtn = document.getElementById("loginBtn");
-  const logout = document.getElementById("logout");
+  const logoutBtn = document.getElementById("logout");
 
-  if (loginBtn) {
-    loginBtn.href = auth;
-  }
+  if (loginBtn) loginBtn.href = auth;
 
-  if (logout) {
-    logout.addEventListener("click", function () {
-      location.href = cfg.LOGOUT_URL || "./";
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", function () {
+      if (window.confirm("Are you sure you want to sign out of the RoZAG Dashboard?")) {
+        window.location.href = logoutUrl;
+      }
     });
   }
 
-  const PLATFORM_META = {
-    youtube: { icon: "🎬", name: "YouTube" },
-    twitch: { icon: "🔴", name: "Twitch" },
-    tiktok: { icon: "🎵", name: "TikTok" },
-    kick: { icon: "🟢", name: "Kick" },
-    instagram: { icon: "📸", name: "Instagram" },
-    x: { icon: "𝕏", name: "X / Twitter" }
-  };
-
   function escapeHtml(value) {
-    return String(value == null ? "" : value).replace(
-      /[&<>"']/g,
-      function (c) {
-        return {
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#39;"
-        }[c];
-      }
-    );
+    return String(value ?? "").replace(/[&<>"']/g, function (c) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
   }
 
-  function platformMeta(platform) {
-    return (
-      PLATFORM_META[String(platform || "").toLowerCase()] || {
-        icon: "📡",
-        name: String(platform || "Unknown").toUpperCase()
-      }
-    );
+  function guildIconUrl(guild) {
+    if (!guild || !guild.id || !guild.icon) return "";
+    return "https://cdn.discordapp.com/icons/" +
+      encodeURIComponent(guild.id) + "/" +
+      encodeURIComponent(guild.icon) + ".png?size=128";
   }
 
-  function associationLabel(type) {
-    return String(type || "").toLowerCase() === "watch"
-      ? "Creator Watch"
-      : "Member";
+  function renderGuildIcon(guild) {
+    const url = guildIconUrl(guild);
+    return url
+      ? '<img src="' + url + '" alt="" class="guild-icon-img">'
+      : '<span class="guild-icon-fallback">⚓</span>';
   }
 
-  function ensureManagementModal() {
-    if (document.getElementById("rozagManagementModal")) {
-      return;
-    }
-
+  function addStyles() {
+    if (document.getElementById("rozag-phase2-styles")) return;
     const style = document.createElement("style");
+    style.id = "rozag-phase2-styles";
     style.textContent = `
-      .rozag-modal-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-        background: rgba(0,0,0,.78);
-        backdrop-filter: blur(8px);
-      }
+      .server-card .manage{transition:transform .16s ease,filter .16s ease}
+      .server-card .manage:hover{transform:translateY(-1px);filter:brightness(1.08)}
+      .guild-icon-img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+      .guild-icon-fallback{font-size:24px}
+      .server-modal-backdrop{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.78);backdrop-filter:blur(8px)}
+      .server-modal{width:min(900px,100%);max-height:min(820px,92vh);overflow:auto;background:linear-gradient(180deg,#151923,#0d1015);border:1px solid #343a47;border-radius:20px;box-shadow:0 30px 100px rgba(0,0,0,.65)}
+      .server-modal-head{display:flex;align-items:center;gap:16px;padding:24px;border-bottom:1px solid #292e39}
+      .server-modal-icon{width:64px;height:64px;flex:0 0 64px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:#202530;border:1px solid #3a404d;font-size:28px}
+      .server-modal-title{flex:1}.server-modal-title h2{margin:0 0 5px;font-size:28px}.server-modal-title p{margin:0;color:#a7adb8}
+      .server-modal-close{border:1px solid #474d59;background:#191c24;color:#f5f6f8;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:22px}
+      .server-modal-body{padding:24px}
+      .server-status-banner{display:flex;align-items:center;gap:10px;padding:14px 16px;border:1px solid #294536;border-radius:12px;background:rgba(59,217,139,.06);color:#bfe9d0;margin-bottom:20px}
+      .server-status-dot{width:10px;height:10px;border-radius:50%;background:#3bd98b;box-shadow:0 0 14px rgba(59,217,139,.7)}
+      .server-overview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px}
+      .server-stat{background:#11151c;border:1px solid #292e39;border-radius:14px;padding:16px}
+      .server-stat-label{color:#8f96a3;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin-bottom:7px}
+      .server-stat-value{font-size:17px;font-weight:850}
+      .server-section{border:1px solid #292e39;background:#10131a;border-radius:16px;padding:20px;margin-top:14px}
+      .server-section h3{margin:0 0 6px;font-size:20px}.server-section p{margin:0;color:#a7adb8;line-height:1.6}
+      .readonly-pill{display:inline-flex;margin-top:14px;padding:7px 10px;border-radius:999px;border:1px solid #604d20;color:#f2b63d;background:rgba(242,182,61,.06);font-size:12px;font-weight:850}
+      .integration-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+      .integration-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:11px;background:#151923;border:1px solid #292e39}
+      .integration-name{font-weight:800}.integration-state{color:#3bd98b;font-size:12px;font-weight:850}
 
-      .rozag-modal-backdrop.open {
-        display: flex;
-      }
-
-      .rozag-modal {
-        width: min(1040px, 96vw);
-        max-height: 90vh;
-        overflow: auto;
-        background:
-          linear-gradient(180deg, #171a22 0%, #0d1016 100%);
-        border: 1px solid #3a404c;
-        border-radius: 22px;
-        box-shadow:
-          0 30px 100px rgba(0,0,0,.75),
-          0 0 0 1px rgba(226,29,46,.16);
-        color: #f5f6f8;
-      }
-
-      .rozag-modal-head {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 20px;
-        padding: 22px 24px;
-        background: rgba(13,16,22,.96);
-        border-bottom: 1px solid #292e39;
-        backdrop-filter: blur(12px);
-      }
-
-      .rozag-modal-title {
-        margin: 0;
-        font-size: 25px;
-        line-height: 1.15;
-      }
-
-      .rozag-modal-subtitle {
-        margin: 6px 0 0;
-        color: #9fa5b0;
-        font-size: 13px;
-      }
-
-      .rozag-modal-close {
-        width: 40px;
-        height: 40px;
-        flex: 0 0 40px;
-        border: 1px solid #414753;
-        border-radius: 10px;
-        background: #1a1e27;
-        color: #fff;
-        font-size: 22px;
-        cursor: pointer;
-      }
-
-      .rozag-modal-body {
-        padding: 24px;
-      }
-
-      .rozag-summary {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-        margin-bottom: 24px;
-      }
-
-      .rozag-summary-card {
-        padding: 16px;
-        background: #11141b;
-        border: 1px solid #292e39;
-        border-radius: 14px;
-      }
-
-      .rozag-summary-label {
-        color: #8f96a2;
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-      }
-
-      .rozag-summary-value {
-        margin-top: 6px;
-        font-size: 24px;
-        font-weight: 900;
-      }
-
-      .rozag-section-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin: 26px 0 12px;
-      }
-
-      .rozag-section-title h3 {
-        margin: 0;
-        font-size: 18px;
-      }
-
-      .rozag-section-title span {
-        color: #8f96a2;
-        font-size: 12px;
-      }
-
-      .rozag-accounts {
-        display: grid;
-        gap: 10px;
-      }
-
-      .rozag-account {
-        display: grid;
-        grid-template-columns: 48px minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 14px;
-        padding: 14px;
-        background: #11141b;
-        border: 1px solid #292e39;
-        border-radius: 14px;
-      }
-
-      .rozag-account-icon {
-        width: 48px;
-        height: 48px;
-        display: grid;
-        place-items: center;
-        border-radius: 12px;
-        background: #1b1f28;
-        font-size: 23px;
-      }
-
-      .rozag-account-name {
-        margin: 0;
-        font-size: 15px;
-        font-weight: 900;
-      }
-
-      .rozag-account-user {
-        margin: 4px 0 0;
-        color: #a7adb7;
-        font-size: 13px;
-      }
-
-      .rozag-account-meta {
-        margin-top: 6px;
-        color: #7f8793;
-        font-size: 11px;
-      }
-
-      .rozag-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 9px;
-        border-radius: 999px;
-        background: #1a1e26;
-        border: 1px solid #353b47;
-        color: #c8ccd3;
-        font-size: 11px;
-        font-weight: 800;
-        white-space: nowrap;
-      }
-
-      .rozag-badge.connected {
-        border-color: rgba(59,217,139,.35);
-        color: #70e7a7;
-      }
-
-      .rozag-badge.route {
-        margin-top: 6px;
-        border-color: rgba(226,29,46,.3);
-        color: #ff777f;
-      }
-
-      .rozag-platform-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-      }
-
-      .rozag-platform {
-        padding: 16px;
-        background: #11141b;
-        border: 1px solid #292e39;
-        border-radius: 14px;
-      }
-
-      .rozag-platform-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
-
-      .rozag-platform-name {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 900;
-      }
-
-      .rozag-platform-count {
-        font-size: 22px;
-        font-weight: 900;
-      }
-
-      .rozag-platform-state {
-        margin-top: 9px;
-        color: #969da8;
-        font-size: 12px;
-      }
-
-      .rozag-platform.coming-soon {
-        opacity: .72;
-      }
-
-      .rozag-routing {
-        display: grid;
-        gap: 9px;
-      }
-
-      .rozag-route-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 14px;
-        padding: 12px 14px;
-        background: #11141b;
-        border: 1px solid #292e39;
-        border-radius: 12px;
-      }
-
-      .rozag-route-name {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 800;
-      }
-
-      .rozag-route-channel {
-        color: #a8aeb8;
-        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-        font-size: 12px;
-        text-align: right;
-      }
-
-      .rozag-empty {
-        padding: 22px;
-        color: #9299a5;
-        text-align: center;
-        background: #11141b;
-        border: 1px dashed #343a46;
-        border-radius: 14px;
-      }
-
-      .rozag-error {
-        padding: 16px;
-        color: #ff9aa0;
-        background: rgba(226,29,46,.08);
-        border: 1px solid rgba(226,29,46,.3);
-        border-radius: 12px;
-      }
-
-      .rozag-loading {
-        padding: 40px;
-        color: #9fa5b0;
-        text-align: center;
-      }
-
-      @media (max-width: 820px) {
-        .rozag-summary,
-        .rozag-platform-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .rozag-account {
-          grid-template-columns: 42px minmax(0, 1fr);
-        }
-
-        .rozag-account > .rozag-badge {
-          grid-column: 2;
-          justify-self: start;
-        }
-      }
-
-      @media (max-width: 560px) {
-        .rozag-summary,
-        .rozag-platform-grid {
-          grid-template-columns: 1fr;
-        }
-
-        .rozag-modal-backdrop {
-          padding: 8px;
-        }
-
-        .rozag-modal-body {
-          padding: 16px;
-        }
-      }
+      .social-account-list{display:grid;gap:10px;margin-top:16px}
+      .social-account-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border-radius:12px;background:#151923;border:1px solid #292e39}
+      .social-account-main{min-width:0}
+      .social-account-creator{font-weight:850}
+      .social-account-platform{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#8f96a3;margin-top:3px}
+      .social-account-name{color:#c9ced8;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .social-account-link{color:#f2b63d;text-decoration:none;font-size:12px;font-weight:850;white-space:nowrap}
+      .social-account-link:hover{text-decoration:underline}
+      .social-empty{color:#a7adb8;padding:14px 0}
+      .social-hub-error{color:#ff8f8f;padding:12px 0}
+      @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
     `;
-
     document.head.appendChild(style);
+  }
 
-    const backdrop = document.createElement("div");
-    backdrop.id = "rozagManagementModal";
-    backdrop.className = "rozag-modal-backdrop";
-    backdrop.innerHTML = `
-      <div class="rozag-modal" role="dialog" aria-modal="true">
-        <div class="rozag-modal-head">
-          <div>
-            <h2 class="rozag-modal-title" id="rozagModalTitle">
-              Server Management
-            </h2>
-            <p class="rozag-modal-subtitle" id="rozagModalSubtitle">
-              Loading RoZAG configuration…
-            </p>
+  function closeModal() {
+    const modal = document.getElementById("server-management-modal");
+    if (modal) modal.remove();
+    document.body.style.overflow = "";
+  }
+
+
+  async function loadSocialHub(guild, modal) {
+    const loading = modal.querySelector(".social-hub-loading");
+    const box = modal.querySelector(".social-hub-data");
+
+    if (!box || !guild || !guild.id) return;
+
+    try {
+      const response = await fetch(
+        "https://rozag.coolvetspaces.com/dashboard/api/server/" +
+          encodeURIComponent(String(guild.id)) +
+          "/social",
+        {
+          credentials: "include",
+          cache: "no-store"
+        }
+      );
+
+      const data = await response.json().catch(function () {
+        return null;
+      });
+
+      if (!response.ok || !data || !data.ok) {
+        throw new Error("Social Hub request failed");
+      }
+
+      if (loading) loading.remove();
+
+      const accounts = Array.isArray(data.accounts) ? data.accounts : [];
+
+      if (!accounts.length) {
+        box.innerHTML =
+          '<div class="social-empty">No connected creator accounts are currently associated with this server.</div>';
+        return;
+      }
+
+      box.innerHTML =
+        '<div class="social-account-list">' +
+        accounts.map(function (account) {
+          const profile = account.profile_url
+            ? '<a class="social-account-link" href="' +
+              escapeHtml(account.profile_url) +
+              '" target="_blank" rel="noopener noreferrer">View profile</a>'
+            : "";
+
+          return '<div class="social-account-row">' +
+            '<div class="social-account-main">' +
+              '<div class="social-account-creator">' +
+                escapeHtml(account.creator || "Unknown creator") +
+              '</div>' +
+              '<div class="social-account-platform">' +
+                escapeHtml(account.platform || "Unknown platform") +
+              '</div>' +
+              '<div class="social-account-name">' +
+                escapeHtml(account.username || account.channel_id || "Connected account") +
+              '</div>' +
+            '</div>' +
+            profile +
+          '</div>';
+        }).join("") +
+        '</div>';
+
+    } catch (error) {
+      console.error("RoZAG Phase 3A Social Hub error:", error);
+      if (loading) loading.remove();
+      box.innerHTML =
+        '<div class="social-hub-error">Unable to load Social Hub data right now.</div>';
+    }
+  }
+
+  function openServerManagement(guild) {
+    if (!guild) return;
+    closeModal();
+
+    const modal = document.createElement("div");
+    modal.id = "server-management-modal";
+    modal.className = "server-modal-backdrop";
+
+    const access = guild.owner
+      ? "Server Owner"
+      : (guild.administrator ? "Administrator" : "Manage Server");
+
+    modal.innerHTML = `
+      <div class="server-modal" role="dialog" aria-modal="true">
+        <div class="server-modal-head">
+          <div class="server-modal-icon">${renderGuildIcon(guild)}</div>
+          <div class="server-modal-title">
+            <h2>${escapeHtml(guild.name || "Unnamed Server")}</h2>
+            <p>RoZAG server management</p>
           </div>
-          <button
-            type="button"
-            class="rozag-modal-close"
-            id="rozagModalClose"
-            aria-label="Close"
-          >×</button>
+          <button class="server-modal-close" type="button" aria-label="Close">×</button>
         </div>
-        <div class="rozag-modal-body" id="rozagModalBody">
-          <div class="rozag-loading">Loading…</div>
+        <div class="server-modal-body">
+          <div class="server-status-banner">
+            <span class="server-status-dot"></span>
+            <strong>RoZAG access available</strong>
+            <span>•</span><span>Read-only test phase</span>
+          </div>
+
+          <div class="server-overview-grid">
+            <div class="server-stat">
+              <div class="server-stat-label">Server access</div>
+              <div class="server-stat-value">${escapeHtml(access)}</div>
+            </div>
+            <div class="server-stat">
+              <div class="server-stat-label">Server ID</div>
+              <div class="server-stat-value">${escapeHtml(guild.id || "Unknown")}</div>
+            </div>
+            <div class="server-stat">
+              <div class="server-stat-label">RoZAG status</div>
+              <div class="server-stat-value">Connected</div>
+            </div>
+          </div>
+
+          <div class="server-section">
+            <h3>Social Integrations</h3>
+            <p>Platform availability is displayed here only. No settings or accounts are changed in this phase.</p>
+            <div class="integration-list">
+              <div class="integration-row"><span class="integration-name">YouTube</span><span class="integration-state">Available</span></div>
+              <div class="integration-row"><span class="integration-name">TikTok</span><span class="integration-state">Available</span></div>
+              <div class="integration-row"><span class="integration-name">Twitch</span><span class="integration-state">Available</span></div>
+              <div class="integration-row"><span class="integration-name">Kick</span><span class="integration-state">Available</span></div>
+            </div>
+            <span class="readonly-pill">READ-ONLY • NO SETTINGS CHANGED</span>
+          </div>
+
+          <div class="server-section">
+            <h3>Social Hub</h3>
+            <p class="social-hub-loading">Loading connected creator accounts…</p>
+            <div class="social-hub-data"></div>
+          </div>
+
+          <div class="server-section">
+            <h3>Bot &amp; Health</h3>
+            <p>Connection and heartbeat controls will be added after the read-only server view is validated.</p>
+          </div>
         </div>
       </div>
     `;
 
-    document.body.appendChild(backdrop);
+    document.body.appendChild(modal);
+    document.body.style.overflow = "hidden";
 
-    document
-      .getElementById("rozagModalClose")
-      .addEventListener("click", closeManagementModal);
+    loadSocialHub(guild, modal);
 
-    backdrop.addEventListener("click", function (event) {
-      if (event.target === backdrop) {
-        closeManagementModal();
-      }
+    modal.querySelector(".server-modal-close").addEventListener("click", closeModal);
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) closeModal();
     });
-
-    document.addEventListener("keydown", function (event) {
-      if (event.key === "Escape") {
-        closeManagementModal();
-      }
-    });
-  }
-
-  function closeManagementModal() {
-    const modal = document.getElementById("rozagManagementModal");
-    if (modal) {
-      modal.classList.remove("open");
-    }
-  }
-
-  function openManagementModal(guildId, guildName) {
-    ensureManagementModal();
-
-    const modal = document.getElementById("rozagManagementModal");
-    const title = document.getElementById("rozagModalTitle");
-    const subtitle = document.getElementById("rozagModalSubtitle");
-    const body = document.getElementById("rozagModalBody");
-
-    title.textContent =
-      "Manage " + (guildName || "Server");
-
-    subtitle.textContent =
-      "Connected accounts and feed routing";
-
-    body.innerHTML =
-      '<div class="rozag-loading">Loading RoZAG server data…</div>';
-
-    modal.classList.add("open");
-
-    if (!serverApiBase) {
-      body.innerHTML =
-        '<div class="rozag-error">The dashboard server API URL is not configured.</div>';
-      return;
-    }
-
-    const url =
-      serverApiBase.replace(/\/+$/, "") +
-      "/" +
-      encodeURIComponent(String(guildId));
-
-    fetch(url, {
-      credentials: "include",
-      cache: "no-store"
-    })
-      .then(function (response) {
-        return response.json().then(function (data) {
-          if (!response.ok) {
-            const error =
-              data && data.error
-                ? data.error
-                : "server_lookup_failed";
-            throw new Error(error);
-          }
-          return data;
-        });
-      })
-      .then(renderServerManagement)
-      .catch(function (error) {
-        console.error(
-          "RoZAG server management lookup failed:",
-          error
-        );
-
-        body.innerHTML =
-          '<div class="rozag-error">' +
-          escapeHtml(
-            "Could not load this server: " +
-            error.message
-          ) +
-          "</div>";
-      });
-  }
-
-  function renderServerManagement(data) {
-    const body = document.getElementById("rozagModalBody");
-
-    if (!data || !data.ok) {
-      body.innerHTML =
-        '<div class="rozag-error">No usable server data was returned.</div>';
-      return;
-    }
-
-    const accounts = Array.isArray(data.accounts)
-      ? data.accounts
-      : [];
-
-    const platforms = Array.isArray(data.platforms)
-      ? data.platforms
-      : [];
-
-    const routing = Array.isArray(data.routing)
-      ? data.routing
-      : [];
-
-    const counts = data.platform_counts || {};
-
-    const connectedPlatformCount = platforms.filter(
-      function (platform) {
-        return platform.status === "connected";
-      }
-    ).length;
-
-    const memberCount = accounts.filter(
-      function (account) {
-        return account.association_type !== "watch";
-      }
-    ).length;
-
-    const watchCount = accounts.filter(
-      function (account) {
-        return account.association_type === "watch";
-      }
-    ).length;
-
-    const accountCards = accounts.length
-      ? accounts.map(function (account) {
-          const meta = platformMeta(account.platform);
-
-          const route = account.feed || {};
-
-          return (
-            '<article class="rozag-account">' +
-              '<div class="rozag-account-icon">' +
-                meta.icon +
-              '</div>' +
-
-              '<div>' +
-                '<h4 class="rozag-account-name">' +
-                  escapeHtml(account.creator_name) +
-                '</h4>' +
-
-                '<p class="rozag-account-user">' +
-                  escapeHtml(
-                    account.username
-                      ? "@" + account.username.replace(/^@/, "")
-                      : "No username recorded"
-                  ) +
-                '</p>' +
-
-                '<div class="rozag-account-meta">' +
-                  escapeHtml(meta.name) +
-                  " · " +
-                  escapeHtml(
-                    associationLabel(
-                      account.association_type
-                    )
-                  ) +
-                '</div>' +
-              '</div>' +
-
-              '<div>' +
-                '<span class="rozag-badge connected">● Connected</span>' +
-                '<div>' +
-                  (
-                    route.channel_id
-                      ? '<span class="rozag-badge route">' +
-                        "Feed routed" +
-                        "</span>"
-                      : '<span class="rozag-badge">' +
-                        "No feed route recorded" +
-                        "</span>"
-                  ) +
-                '</div>' +
-              '</div>' +
-            '</article>'
-          );
-        }).join("")
-      : '<div class="rozag-empty">' +
-          "No connected creator accounts are registered for this server." +
-        "</div>";
-
-    const platformCards = platforms.map(
-      function (platform) {
-        const count =
-          Number(counts[platform.platform] || 0);
-
-        if (platform.status === "coming_soon") {
-          return (
-            '<article class="rozag-platform coming-soon">' +
-              '<div class="rozag-platform-top">' +
-                '<div class="rozag-platform-name">' +
-                  platform.icon +
-                  " " +
-                  escapeHtml(platform.name) +
-                "</div>" +
-                '<div class="rozag-platform-count">—</div>' +
-              "</div>" +
-              '<div class="rozag-platform-state">' +
-                "Coming Soon" +
-              "</div>" +
-            "</article>"
-          );
-        }
-
-        return (
-          '<article class="rozag-platform">' +
-            '<div class="rozag-platform-top">' +
-              '<div class="rozag-platform-name">' +
-                platform.icon +
-                " " +
-                escapeHtml(platform.name) +
-              "</div>" +
-              '<div class="rozag-platform-count">' +
-                count +
-              "</div>" +
-            "</div>" +
-            '<div class="rozag-platform-state">' +
-              (
-                count > 0
-                  ? "Connected creator account" +
-                    (count === 1 ? "" : "s")
-                  : "No connected accounts"
-              ) +
-            "</div>" +
-          "</article>"
-        );
-      }
-    ).join("");
-
-    const routingRows = routing.length
-      ? routing.map(function (route) {
-          const meta = platformMeta(route.platform);
-
-          return (
-            '<div class="rozag-route-row">' +
-              '<div class="rozag-route-name">' +
-                meta.icon +
-                " " +
-                escapeHtml(meta.name) +
-              "</div>" +
-              '<div class="rozag-route-channel">' +
-                (
-                  route.channel_id
-                    ? escapeHtml(
-                        "Channel ID: " +
-                        route.channel_id
-                      )
-                    : "No channel"
-                ) +
-                " · " +
-                (
-                  route.enabled
-                    ? "Enabled"
-                    : "Disabled"
-                ) +
-              "</div>" +
-            "</div>"
-          );
-        }).join("")
-      : '<div class="rozag-empty">' +
-          "No platform routing records are stored for this server." +
-        "</div>";
-
-    body.innerHTML =
-      '<div class="rozag-summary">' +
-
-        '<div class="rozag-summary-card">' +
-          '<div class="rozag-summary-label">Connected Accounts</div>' +
-          '<div class="rozag-summary-value">' +
-            accounts.length +
-          "</div>" +
-        "</div>" +
-
-        '<div class="rozag-summary-card">' +
-          '<div class="rozag-summary-label">Platforms Used</div>' +
-          '<div class="rozag-summary-value">' +
-            connectedPlatformCount +
-          "</div>" +
-        "</div>" +
-
-        '<div class="rozag-summary-card">' +
-          '<div class="rozag-summary-label">Members</div>' +
-          '<div class="rozag-summary-value">' +
-            memberCount +
-          "</div>" +
-        "</div>" +
-
-        '<div class="rozag-summary-card">' +
-          '<div class="rozag-summary-label">Creator Watch</div>' +
-          '<div class="rozag-summary-value">' +
-            watchCount +
-          "</div>" +
-        "</div>" +
-
-      "</div>" +
-
-      '<div class="rozag-section-title">' +
-        "<h3>Connected Creator Accounts</h3>" +
-        "<span>Actual account associations</span>" +
-      "</div>" +
-
-      '<div class="rozag-accounts">' +
-        accountCards +
-      "</div>" +
-
-      '<div class="rozag-section-title">' +
-        "<h3>Platform Connection Status</h3>" +
-        "<span>Based on connected accounts — not channel slots</span>" +
-      "</div>" +
-
-      '<div class="rozag-platform-grid">' +
-        platformCards +
-      "</div>" +
-
-      '<div class="rozag-section-title">' +
-        "<h3>Feed Routing</h3>" +
-        "<span>Discord destination channels only</span>" +
-      "</div>" +
-
-      '<div class="rozag-routing">' +
-        routingRows +
-      "</div>";
   }
 
   function render(data) {
-    if (!data || !data.authenticated) {
-      return;
-    }
+    if (!data || !data.authenticated) return;
 
-    if (login) {
-      login.classList.add("hidden");
-    }
+    if (login) login.classList.add("hidden");
+    if (dash) dash.classList.remove("hidden");
+    if (user) user.classList.remove("hidden");
 
-    if (dash) {
-      dash.classList.remove("hidden");
-    }
+    const displayName = data.user?.global_name || data.user?.username || "Discord User";
+    const username = document.getElementById("username");
+    const avatar = document.getElementById("avatar");
 
-    if (user) {
-      user.classList.remove("hidden");
-    }
-
-    const usernameEl =
-      document.getElementById("username");
-
-    if (usernameEl) {
-      usernameEl.textContent =
-        data.user?.global_name ||
-        data.user?.username ||
-        "Discord User";
-    }
-
-    const avatarEl =
-      document.getElementById("avatar");
-
-    if (avatarEl) {
-      avatarEl.textContent =
-        (data.user?.username || "D")
-          .slice(0, 1)
-          .toUpperCase();
-    }
+    if (username) username.textContent = displayName;
+    if (avatar) avatar.textContent = (data.user?.username || displayName || "D").slice(0, 1).toUpperCase();
 
     const list = Array.isArray(data.servers)
       ? data.servers
-      : [];
+      : (Array.isArray(data.guilds) ? data.guilds : []);
 
-    if (!servers) {
-      return;
-    }
+    if (!servers) return;
 
     if (!list.length) {
-      servers.innerHTML =
-        '<div class="empty">No manageable RoZAG servers were found.</div>';
+      servers.innerHTML = '<div class="empty">No manageable RoZAG servers were found.</div>';
       return;
     }
 
-    servers.innerHTML = list.map(function (g) {
-      const icon = g.icon
-        ? '<img src="https://cdn.discordapp.com/icons/' +
-          encodeURIComponent(String(g.id || "")) +
-          "/" +
-          encodeURIComponent(String(g.icon)) +
-          '.png?size=128" alt="" style="width:100%;height:100%;border-radius:12px;object-fit:cover;">'
-        : "🏴‍☠️";
-
-      return (
-        '<article class="server-card">' +
-          '<div class="server-head">' +
-            '<div class="guild-icon">' +
-              icon +
-            "</div>" +
-
-            '<div class="server-meta">' +
-              '<h3>' +
-                escapeHtml(
-                  g.name || "Unnamed Server"
-                ) +
-              "</h3>" +
-
-              '<span class="online">RoZAG access available</span>' +
-            "</div>" +
-          "</div>" +
-
-          '<button class="btn primary manage" data-guild="' +
-            escapeHtml(String(g.id || "")) +
-            '">' +
-            "Manage Server" +
-          "</button>" +
-        "</article>"
-      );
+    servers.innerHTML = list.map(function (guild) {
+      return `
+        <article class="server-card">
+          <div class="server-head">
+            <div class="guild-icon">${renderGuildIcon(guild)}</div>
+            <div class="server-meta">
+              <h3>${escapeHtml(guild.name || "Unnamed Server")}</h3>
+              <span class="online">RoZAG access available</span>
+            </div>
+          </div>
+          <button class="btn primary manage" type="button">Manage Server</button>
+        </article>
+      `;
     }).join("");
 
-    document
-      .querySelectorAll(".manage")
-      .forEach(function (button) {
-        button.addEventListener(
-          "click",
-          function () {
-            openManagementModal(
-              button.getAttribute("data-guild"),
-              button.closest(".server-card")
-                ?.querySelector("h3")
-                ?.textContent ||
-                "Server"
-            );
-          }
-        );
+    servers.querySelectorAll(".manage").forEach(function (button, index) {
+      button.addEventListener("click", function () {
+        openServerManagement(list[index]);
       });
+    });
   }
 
-  if (me) {
-    fetch(me, {
-      credentials: "include",
-      cache: "no-store"
-    })
-      .then(function (response) {
-        if (!response.ok) {
-          if (response.status === 401) {
-            return null;
-          }
-          throw new Error(
-            "HTTP " + response.status
-          );
-        }
+  addStyles();
 
-        return response.json();
-      })
+  if (me) {
+    fetch(me, {credentials:"include", cache:"no-store"})
+      .then(function (response) { return response.ok ? response.json() : null; })
       .then(render)
       .catch(function (error) {
-        console.error(
-          "RoZAG dashboard session lookup failed:",
-          error
-        );
+        console.error("RoZAG dashboard session check failed:", error);
       });
   }
 })();
