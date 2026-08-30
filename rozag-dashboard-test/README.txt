@@ -1,13 +1,31 @@
-RoZAG Dashboard TEST — Phase 2 Read-Only
-Replace the existing app.js with this file.
+ROZAG DASHBOARD - LOCKED WORKING PHASE 3
 
-Adds:
-- Proper Manage Server read-only panel instead of the test alert
-- Discord server icons
-- Server access, ID and RoZAG connection status
-- Social integration overview
-- Bot & Health placeholder
-- Sign-out confirmation
-- Compatible with the existing /api/me response field "servers"
+GitHub Pages:
+  app.js
+  config.js
 
-Do not change config.js or the Python backend for this phase.
+Host Africa:
+  app.py
+
+IMPORTANT:
+The frontend is hosted at:
+  https://redbeardx69.github.io/rozag-social-feed/rozag-dashboard-test/
+
+The browser Origin is:
+  https://redbeardx69.github.io
+
+The backend CORS configuration therefore uses the origin only.
+Do not change it to the full GitHub Pages path.
+
+The Discord OAuth callback remains:
+  https://rozag.coolvetspaces.com/dashboard/callback
+
+The backend keeps:
+  - credentialed CORS
+  - SameSite=None session cookie
+  - stable DASHBOARD_SESSION_SECRET from the Host Africa var/env setting
+  - Discord identify + guilds OAuth
+  - /api/me manageable-server discovery
+  - Phase 3 server data endpoint
+  - connected-account lookup through guild_social_accounts -> social_accounts -> creators
+  - guild_platforms only for feed routing
