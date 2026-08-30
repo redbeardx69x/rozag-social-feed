@@ -30,6 +30,57 @@
     });
   }
 
+  function discordAvatarUrl(user) {
+    if (!user || !user.id || !user.avatar) return "";
+    const extension = String(user.avatar).startsWith("a_") ? "gif" : "png";
+
+    return (
+      "https://cdn.discordapp.com/avatars/" +
+      encodeURIComponent(user.id) +
+      "/" +
+      encodeURIComponent(user.avatar) +
+      "." + extension +
+      "?size=128"
+    );
+  }
+
+  function renderAvatar(user) {
+    const box = document.getElementById("avatar");
+    if (!box) return;
+
+    const url = discordAvatarUrl(user);
+
+    if (!url) {
+      box.textContent = (
+        user?.username ||
+        user?.global_name ||
+        "D"
+      ).slice(0, 1).toUpperCase();
+      return;
+    }
+
+    box.innerHTML = "";
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = "Discord profile picture";
+    img.referrerPolicy = "no-referrer";
+    img.style.width = "100%";
+    img.style.height = "100%";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "inherit";
+
+    img.onerror = function () {
+      box.textContent = (
+        user?.username ||
+        user?.global_name ||
+        "D"
+      ).slice(0, 1).toUpperCase();
+    };
+
+    box.appendChild(img);
+  }
+
   function guildIconUrl(guild) {
     if (!guild || !guild.id || !guild.icon) return "";
     return "https://cdn.discordapp.com/icons/" +
@@ -293,7 +344,9 @@
     const avatar = document.getElementById("avatar");
 
     if (username) username.textContent = displayName;
-    if (avatar) avatar.textContent = (data.user?.username || displayName || "D").slice(0, 1).toUpperCase();
+    if (avatar) {
+      renderAvatar(data.user || {});
+    }
 
     const list = Array.isArray(data.servers)
       ? data.servers
