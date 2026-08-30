@@ -138,6 +138,17 @@
       .creator-profile:hover{text-decoration:underline}
       .creator-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
       .creator-summary-pill{padding:7px 10px;border-radius:999px;border:1px solid #343a47;background:#151923;color:#c9ced8;font-size:12px;font-weight:800}
+
+      .feed-config{margin-top:18px}
+      .feed-config-title{font-size:14px;font-weight:850;margin-bottom:10px;color:#f5f6f8}
+      .feed-list{display:grid;gap:10px}
+      .feed-row{display:grid;grid-template-columns:minmax(100px,1fr) minmax(140px,2fr) auto;align-items:center;gap:14px;padding:13px 14px;border-radius:11px;background:#151923;border:1px solid #292e39}
+      .feed-platform{font-weight:850}
+      .feed-destination{color:#c9ced8;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .feed-status{font-size:12px;font-weight:850;white-space:nowrap}
+      .feed-status.active{color:#3bd98b}
+      .feed-status.inactive{color:#8f96a3}
+      @media(max-width:700px){.feed-row{grid-template-columns:1fr;gap:6px}}
       @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
     `;
     document.head.appendChild(style);
@@ -237,9 +248,58 @@
         );
       }).join("");
 
+      const feeds = Array.isArray(data.feed_configuration)
+        ? data.feed_configuration
+        : [];
+
+      const feedRows = feeds.map(function (feed) {
+        const platform = feed.platform || "Unknown";
+        const destination =
+          feed.channel_name ||
+          feed.channel_id ||
+          "No Discord channel configured";
+
+        const active = feed.enabled === true;
+
+        return (
+          '<div class="feed-row">' +
+            '<div class="feed-platform">' +
+              escapeHtml(platform) +
+            "</div>" +
+            '<div class="feed-destination">' +
+              escapeHtml(destination) +
+            "</div>" +
+            '<div class="feed-status ' +
+              (active ? "active" : "inactive") +
+              '">' +
+              (active ? "Enabled" : "Disabled") +
+            "</div>" +
+          "</div>"
+        );
+      }).join("");
+
+      const feedSection = feeds.length
+        ? (
+            '<div class="feed-config">' +
+              '<div class="feed-config-title">Platform routing</div>' +
+              '<div class="feed-list">' +
+                feedRows +
+              "</div>" +
+            "</div>"
+          )
+        : (
+            '<div class="feed-config">' +
+              '<div class="feed-config-title">Platform routing</div>' +
+              '<div class="social-hub-empty">' +
+                "No feed routing configuration is currently recorded for this server." +
+              "</div>" +
+            "</div>"
+          );
+
       box.innerHTML =
         '<div class="creator-list">' + cards + "</div>" +
-        '<div class="creator-summary">' + summary + "</div>";
+        '<div class="creator-summary">' + summary + "</div>" +
+        feedSection;
 
     } catch (error) {
       console.error("RoZAG Social Hub Phase 3A failed:", error);
