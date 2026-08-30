@@ -379,7 +379,7 @@
     const body = document.getElementById("rozagModalBody");
 
     title.textContent = "Manage " + (guildName || "Server");
-    subtitle.textContent = "Social accounts, members and feed routing";
+    subtitle.textContent = "Social accounts and members";
     body.innerHTML = '<div class="rozag-loading">Loading RoZAG server data…</div>';
     modal.classList.add("open");
 
@@ -403,11 +403,7 @@
       .filter(function (platform) {
         return !!PLATFORM_META[String(platform.platform || "").toLowerCase()];
       });
-    const routing = (Array.isArray(data.routing) ? data.routing : [])
-      .filter(function (route) {
-        return !!PLATFORM_META[String(route.platform || "").toLowerCase()];
-      });
-    const counts = data.platform_counts || {};
+const counts = data.platform_counts || {};
 
     const connectedPlatformCount = platforms.filter(function (p) {
       return p.status === "connected";
@@ -539,9 +535,9 @@
       '<div class="rozag-accounts">' + accountCards + '</div>' +
 
       '<div class="rozag-section-title"><h3>Platform Connection Status</h3><span>Actual connected accounts</span></div>' +
-      '<div class="rozag-platform-grid">' + platformCards + '</div>' +
+      '<div class="rozag-platform-grid">' + platformCards + '</div>';
 
-    document.getElementById("rozagAddAccount").addEventListener(
+document.getElementById("rozagAddAccount").addEventListener(
       "click",
       function () {
         showAddPanel(guildId);
