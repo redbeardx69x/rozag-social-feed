@@ -72,17 +72,6 @@
       .integration-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
       .integration-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:11px;background:#151923;border:1px solid #292e39}
       .integration-name{font-weight:800}.integration-state{color:#3bd98b;font-size:12px;font-weight:850}
-
-      .social-account-list{display:grid;gap:10px;margin-top:16px}
-      .social-account-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border-radius:12px;background:#151923;border:1px solid #292e39}
-      .social-account-main{min-width:0}
-      .social-account-creator{font-weight:850}
-      .social-account-platform{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#8f96a3;margin-top:3px}
-      .social-account-name{color:#c9ced8;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-      .social-account-link{color:#f2b63d;text-decoration:none;font-size:12px;font-weight:850;white-space:nowrap}
-      .social-account-link:hover{text-decoration:underline}
-      .social-empty{color:#a7adb8;padding:14px 0}
-      .social-hub-error{color:#ff8f8f;padding:12px 0}
       @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
     `;
     document.head.appendChild(style);
@@ -94,78 +83,44 @@
     document.body.style.overflow = "";
   }
 
+  function apiBase() {
+    const base =
+      cfg.SERVER_API_BASE_URL ||
+      "https://rozag.coolvetspaces.com/dashboard/api/server";
+    return base.replace(/\/+$/, "");
+  }
 
-  async function loadSocialHub(guild, modal) {
-    const loading = modal.querySelector(".social-hub-loading");
-    const box = modal.querySelector(".social-hub-data");
-
-    if (!box || !guild || !guild.id) return;
-
-    try {
-      const response = await fetch(
-        "https://rozag.coolvetspaces.com/dashboard/api/server/" +
-          encodeURIComponent(String(guild.id)) +
-          "/social",
-        {
-          credentials: "include",
-          cache: "no-store"
+  function fetchJson(url, options) {
+    return fetch(url, Object.assign({
+      credentials: "include",
+      cache: "no-store",
+      headers: {}
+    }, options || {})).then(function (response) {
+      return response.text().then(function (text) {
+        let data = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch (error) {
+          throw new Error(
+            "Server returned non-JSON data (HTTP " +
+            response.status +
+            "). Check the dashboard backend route."
+          );
         }
-      );
 
-      const data = await response.json().catch(function () {
-        return null;
+        if (!response.ok) {
+          throw new Error(
+            data.message || data.error || ("HTTP " + response.status)
+          );
+        }
+
+        return data;
       });
-
-      if (!response.ok || !data || !data.ok) {
-        throw new Error("Social Hub request failed");
-      }
-
-      if (loading) loading.remove();
-
-      const accounts = Array.isArray(data.accounts) ? data.accounts : [];
-
-      if (!accounts.length) {
-        box.innerHTML =
-          '<div class="social-empty">No connected creator accounts are currently associated with this server.</div>';
-        return;
-      }
-
-      box.innerHTML =
-        '<div class="social-account-list">' +
-        accounts.map(function (account) {
-          const profile = account.profile_url
-            ? '<a class="social-account-link" href="' +
-              escapeHtml(account.profile_url) +
-              '" target="_blank" rel="noopener noreferrer">View profile</a>'
-            : "";
-
-          return '<div class="social-account-row">' +
-            '<div class="social-account-main">' +
-              '<div class="social-account-creator">' +
-                escapeHtml(account.creator || "Unknown creator") +
-              '</div>' +
-              '<div class="social-account-platform">' +
-                escapeHtml(account.platform || "Unknown platform") +
-              '</div>' +
-              '<div class="social-account-name">' +
-                escapeHtml(account.username || account.channel_id || "Connected account") +
-              '</div>' +
-            '</div>' +
-            profile +
-          '</div>';
-        }).join("") +
-        '</div>';
-
-    } catch (error) {
-      console.error("RoZAG Phase 3A Social Hub error:", error);
-      if (loading) loading.remove();
-      box.innerHTML =
-        '<div class="social-hub-error">Unable to load Social Hub data right now.</div>';
-    }
+    });
   }
 
   function openServerManagement(guild) {
-    if (!guild) return;
+    if (!guild || !guild.id) return;
     closeModal();
 
     const modal = document.createElement("div");
@@ -190,7 +145,7 @@
           <div class="server-status-banner">
             <span class="server-status-dot"></span>
             <strong>RoZAG access available</strong>
-            <span>•</span><span>Read-only test phase</span>
+            <span>•</span><span>Server management</span>
           </div>
 
           <div class="server-overview-grid">
@@ -200,35 +155,18 @@
             </div>
             <div class="server-stat">
               <div class="server-stat-label">Server ID</div>
-              <div class="server-stat-value">${escapeHtml(guild.id || "Unknown")}</div>
+              <div class="server-stat-value">${escapeHtml(guild.id)}</div>
             </div>
             <div class="server-stat">
               <div class="server-stat-label">RoZAG status</div>
-              <div class="server-stat-value">Connected</div>
+              <div class="server-stat-value">Loading…</div>
             </div>
           </div>
 
-          <div class="server-section">
-            <h3>Social Integrations</h3>
-            <p>Platform availability is displayed here only. No settings or accounts are changed in this phase.</p>
-            <div class="integration-list">
-              <div class="integration-row"><span class="integration-name">YouTube</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">TikTok</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">Twitch</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">Kick</span><span class="integration-state">Available</span></div>
+          <div id="server-management-content">
+            <div class="server-section">
+              <p>Loading connected creator accounts…</p>
             </div>
-            <span class="readonly-pill">READ-ONLY • NO SETTINGS CHANGED</span>
-          </div>
-
-          <div class="server-section">
-            <h3>Social Hub</h3>
-            <p class="social-hub-loading">Loading connected creator accounts…</p>
-            <div class="social-hub-data"></div>
-          </div>
-
-          <div class="server-section">
-            <h3>Bot &amp; Health</h3>
-            <p>Connection and heartbeat controls will be added after the read-only server view is validated.</p>
           </div>
         </div>
       </div>
@@ -237,13 +175,461 @@
     document.body.appendChild(modal);
     document.body.style.overflow = "hidden";
 
-    loadSocialHub(guild, modal);
-
     modal.querySelector(".server-modal-close").addEventListener("click", closeModal);
     modal.addEventListener("click", function (event) {
       if (event.target === modal) closeModal();
     });
+
+    loadServerManagement(guild, modal);
   }
+
+  function loadServerManagement(guild, modal) {
+    const content = modal.querySelector("#server-management-content");
+    if (!content) return;
+
+    fetchJson(
+      apiBase() + "/" + encodeURIComponent(String(guild.id))
+    ).then(function (data) {
+      renderServerManagement(guild, modal, data);
+    }).catch(function (error) {
+      content.innerHTML =
+        '<div class="server-section">' +
+          '<p style="color:#ff8f98;">Could not load this server: ' +
+          escapeHtml(error.message) +
+          '</p>' +
+        '</div>';
+    });
+  }
+
+  function renderServerManagement(guild, modal, data) {
+    const content = modal.querySelector("#server-management-content");
+    if (!content) return;
+
+    const accounts = Array.isArray(data.accounts) ? data.accounts : [];
+    const routing = Array.isArray(data.routing) ? data.routing : [];
+    const counts = data.platform_counts || {};
+    const platforms = Array.isArray(data.platforms) ? data.platforms : [];
+
+    const cards = accounts.length
+      ? accounts.map(function (account) {
+          const platform = String(account.platform || "").toLowerCase();
+          const names = {
+            youtube: "YouTube",
+            tiktok: "TikTok",
+            twitch: "Twitch",
+            kick: "Kick"
+          };
+          const icons = {
+            youtube: "🎬",
+            tiktok: "🎵",
+            twitch: "🟣",
+            kick: "🟢"
+          };
+
+          return `
+            <div class="server-section" style="margin-top:10px;">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                <div>
+                  <h3 style="margin-bottom:4px;">
+                    ${icons[platform] || "📡"} ${escapeHtml(account.creator_name || "Unknown creator")}
+                  </h3>
+                  <p>
+                    ${escapeHtml(names[platform] || platform)}
+                    ${account.username ? " · @" + escapeHtml(String(account.username).replace(/^@/, "")) : ""}
+                  </p>
+                  <p style="margin-top:5px;font-size:12px;">
+                    Discord member:
+                    ${escapeHtml(account.discord_user_id || "Not linked")}
+                  </p>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button type="button" class="btn primary rozag-edit-account"
+                    data-account-id="${escapeHtml(account.social_account_id)}">Edit</button>
+                  <button type="button" class="btn rozag-remove-account"
+                    data-account-id="${escapeHtml(account.social_account_id)}">Remove</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")
+      : `
+        <div class="server-section">
+          <h3>No connected creator accounts</h3>
+          <p>Add the first creator account for this server below.</p>
+        </div>
+      `;
+
+    const platformSummary = platforms
+      .filter(function (p) {
+        return ["youtube", "tiktok", "twitch", "kick"].includes(
+          String(p.platform || "").toLowerCase()
+        );
+      })
+      .map(function (p) {
+        return `
+          <div class="integration-row">
+            <span class="integration-name">${escapeHtml(p.icon || "")} ${escapeHtml(p.name || p.platform)}</span>
+            <span class="integration-state">
+              ${Number(counts[p.platform] || 0)} connected
+            </span>
+          </div>
+        `;
+      }).join("");
+
+    const routingSummary = routing.length
+      ? routing.map(function (r) {
+          return `
+            <div class="integration-row">
+              <span class="integration-name">${escapeHtml(r.icon || "")} ${escapeHtml(r.name || r.platform)}</span>
+              <span class="integration-state">
+                ${r.enabled ? "Enabled" : "Disabled"}
+              </span>
+            </div>
+          `;
+        }).join("")
+      : '<p>No feed routing records are configured yet.</p>';
+
+    content.innerHTML = `
+      <div class="server-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div>
+            <h3>Social Accounts</h3>
+            <p>Add, edit or remove the creator accounts associated with this server.</p>
+          </div>
+          <button type="button" class="btn primary" id="rozag-add-account">＋ Add</button>
+        </div>
+      </div>
+
+      <div id="rozag-add-panel"></div>
+
+      <div class="server-section">
+        <h3>Connected Creator Accounts</h3>
+        <div style="margin-top:14px;">${cards}</div>
+      </div>
+
+      <div class="server-section">
+        <h3>Platform Status</h3>
+        <div class="integration-list" style="margin-top:14px;">
+          ${platformSummary}
+        </div>
+      </div>
+
+      <div class="server-section">
+        <h3>Feed Routing</h3>
+        <div class="integration-list" style="margin-top:14px;">
+          ${routingSummary}
+        </div>
+      </div>
+
+      <div class="server-section">
+        <span class="readonly-pill">DISCORD MEMBER + SOCIAL ACCOUNT CHANGES ARE PROTECTED BY SERVER MANAGEMENT ACCESS</span>
+      </div>
+    `;
+
+    modal.querySelector("#rozag-add-account").addEventListener("click", function () {
+      showSocialForm(guild, modal, null);
+    });
+
+    modal.querySelectorAll(".rozag-edit-account").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const id = button.getAttribute("data-account-id");
+        const account = accounts.find(function (a) {
+          return String(a.social_account_id) === String(id);
+        });
+        showSocialForm(guild, modal, account || null);
+      });
+    });
+
+    modal.querySelectorAll(".rozag-remove-account").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const id = button.getAttribute("data-account-id");
+        const account = accounts.find(function (a) {
+          return String(a.social_account_id) === String(id);
+        });
+
+        if (!account) return;
+
+        const label =
+          (account.creator_name || "this account") +
+          (account.username ? " (@" + account.username + ")" : "");
+
+        if (!window.confirm(
+          "Remove " + label + " from this server?\n\n" +
+          "This removes only the server association. It does not delete the global creator account."
+        )) {
+          return;
+        }
+
+        button.disabled = true;
+
+        fetchJson(
+          apiBase() +
+          "/" + encodeURIComponent(String(guild.id)) +
+          "/social/" + encodeURIComponent(String(id)),
+          { method: "DELETE" }
+        ).then(function () {
+          loadServerManagement(guild, modal);
+        }).catch(function (error) {
+          button.disabled = false;
+          window.alert("Remove failed: " + error.message);
+        });
+      });
+    });
+  }
+
+  function showSocialForm(guild, modal, existing) {
+    const panel = modal.querySelector("#rozag-add-panel");
+    if (!panel) return;
+
+    const isEdit = !!existing;
+
+    panel.innerHTML = `
+      <div class="server-section" style="border-color:#454b58;">
+        <h3>${isEdit ? "Edit Social Account" : "Add Social Account"}</h3>
+        <p>
+          ${isEdit
+            ? "Edit the existing creator profile and Discord member association."
+            : "This uses the same creator/member relationship as /social add."}
+        </p>
+
+        <div style="display:grid;gap:12px;margin-top:16px;">
+          <label style="display:grid;gap:6px;color:#a7adb8;font-size:12px;font-weight:800;">
+            Creator / Channel Profile URL
+            <input id="rozag-social-url" type="url"
+              value="${escapeHtml(existing ? (existing.profile_url || "") : "")}"
+              placeholder="https://www.tiktok.com/@username"
+              style="padding:12px;border-radius:10px;border:1px solid #3a404d;background:#171b23;color:#fff;">
+          </label>
+
+          <label style="display:grid;gap:6px;color:#a7adb8;font-size:12px;font-weight:800;">
+            Discord Member
+            <input id="rozag-member-search" type="text"
+              value=""
+              autocomplete="off"
+              placeholder="${existing ? "Search to change member…" : "Search server members…"}"
+              style="padding:12px;border-radius:10px;border:1px solid #3a404d;background:#171b23;color:#fff;">
+          </label>
+
+          <div id="rozag-selected-member"></div>
+          <div id="rozag-member-results"></div>
+
+          ${existing && existing.discord_user_id ? `
+            <div style="font-size:12px;color:#8f96a3;">
+              Current Discord member ID: ${escapeHtml(existing.discord_user_id)}
+            </div>
+          ` : ""}
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn primary" id="rozag-save-social">
+              ${isEdit ? "Save Changes" : "Add Account"}
+            </button>
+            <button type="button" class="btn" id="rozag-cancel-social">Cancel</button>
+          </div>
+
+          <div id="rozag-social-result"></div>
+        </div>
+      </div>
+    `;
+
+    let selectedMember = existing && existing.discord_user_id
+      ? {
+          id: String(existing.discord_user_id),
+          username: "",
+          global_name: "",
+          nick: ""
+        }
+      : null;
+
+    const search = panel.querySelector("#rozag-member-search");
+    const selected = panel.querySelector("#rozag-selected-member");
+    const results = panel.querySelector("#rozag-member-results");
+    const url = panel.querySelector("#rozag-social-url");
+    const save = panel.querySelector("#rozag-save-social");
+    const cancel = panel.querySelector("#rozag-cancel-social");
+    const result = panel.querySelector("#rozag-social-result");
+
+    if (selectedMember) {
+      selected.innerHTML =
+        '<div class="server-status-banner" style="margin:0;">' +
+          '<strong>Current member linked:</strong> ' +
+          escapeHtml(existing.discord_user_id) +
+        '</div>';
+    }
+
+    let timer = null;
+
+    search.addEventListener("input", function () {
+      selectedMember = null;
+      selected.innerHTML = "";
+      const q = search.value.trim();
+
+      if (timer) clearTimeout(timer);
+
+      if (q.length < 2) {
+        results.innerHTML = "";
+        return;
+      }
+
+      timer = setTimeout(function () {
+        results.innerHTML =
+          '<p style="color:#8f96a3;">Searching Discord members…</p>';
+
+        fetchJson(
+          apiBase() +
+          "/" + encodeURIComponent(String(guild.id)) +
+          "/members?query=" + encodeURIComponent(q)
+        ).then(function (data) {
+          const members = Array.isArray(data.members) ? data.members : [];
+
+          if (!members.length) {
+            results.innerHTML =
+              '<p style="color:#8f96a3;">No matching server members found.</p>';
+            return;
+          }
+
+          results.innerHTML = members.map(function (member) {
+            const name =
+              member.global_name ||
+              member.nick ||
+              member.username ||
+              member.id;
+
+            return `
+              <button type="button" class="rozag-member-choice"
+                data-member-id="${escapeHtml(member.id)}"
+                style="display:block;width:100%;text-align:left;padding:10px;margin-top:6px;border:1px solid #303641;border-radius:9px;background:#151923;color:#fff;cursor:pointer;">
+                <strong>${escapeHtml(name)}</strong>
+                <span style="display:block;color:#8f96a3;font-size:12px;">
+                  ${escapeHtml(member.username ? "@" + member.username : member.id)}
+                </span>
+              </button>
+            `;
+          }).join("");
+
+          results.querySelectorAll(".rozag-member-choice").forEach(function (button) {
+            button.addEventListener("click", function () {
+              const member = members.find(function (m) {
+                return String(m.id) === String(button.getAttribute("data-member-id"));
+              });
+
+              if (!member) return;
+
+              selectedMember = member;
+              selected.innerHTML =
+                '<div class="server-status-banner" style="margin:0;">' +
+                  '<strong>Selected:</strong> ' +
+                  escapeHtml(
+                    member.global_name ||
+                    member.nick ||
+                    member.username ||
+                    member.id
+                  ) +
+                '</div>';
+              results.innerHTML = "";
+              search.value =
+                member.global_name ||
+                member.nick ||
+                member.username ||
+                "";
+            });
+          });
+        }).catch(function (error) {
+          results.innerHTML =
+            '<p style="color:#ff8f98;">Member search failed: ' +
+            escapeHtml(error.message) +
+            '</p>';
+        });
+      }, 250);
+    });
+
+    cancel.addEventListener("click", function () {
+      panel.innerHTML = "";
+    });
+
+    save.addEventListener("click", function () {
+      if (!url.value.trim()) {
+        window.alert("Enter the creator/channel profile URL.");
+        return;
+      }
+
+      if (!selectedMember || !selectedMember.id) {
+        window.alert("Select the Discord member who owns this creator account.");
+        return;
+      }
+
+      save.disabled = true;
+      result.innerHTML =
+        '<p style="color:#8f96a3;">Saving…</p>';
+
+      const request = isEdit
+        ? fetchJson(
+            apiBase() +
+            "/" + encodeURIComponent(String(guild.id)) +
+            "/social/" + encodeURIComponent(String(existing.social_account_id)),
+            {
+              method: "PUT",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({
+                url: url.value.trim(),
+                member_id: selectedMember.id
+              })
+            }
+          )
+        : fetchJson(
+            apiBase() +
+            "/" + encodeURIComponent(String(guild.id)) +
+            "/social",
+            {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              body: JSON.stringify({
+                url: url.value.trim(),
+                member_id: selectedMember.id
+              })
+            }
+          );
+
+      request.then(function (data) {
+        let message =
+          '<div class="server-status-banner">' +
+            '<strong>✓ ' +
+            (isEdit ? "Changes saved." : "Account added.") +
+            '</strong>' +
+          '</div>';
+
+        if (data.authorization_required) {
+          message +=
+            '<p style="color:#a7adb8;">' +
+            (
+              data.authorization_sent
+                ? "The existing RoZAG Social bot sent the authorization DM."
+                : "Authorization DM could not be sent."
+            ) +
+            '</p>';
+
+          if (data.authorization_url) {
+            message +=
+              '<p><a href="' +
+              escapeHtml(data.authorization_url) +
+              '" target="_blank" rel="noopener">Open authorization</a></p>';
+          }
+        }
+
+        result.innerHTML = message;
+
+        setTimeout(function () {
+          loadServerManagement(guild, modal);
+        }, 700);
+      }).catch(function (error) {
+        save.disabled = false;
+        result.innerHTML =
+          '<p style="color:#ff8f98;">Save failed: ' +
+          escapeHtml(error.message) +
+          '</p>';
+      });
+    });
+  }
+
 
   function render(data) {
     if (!data || !data.authenticated) return;
