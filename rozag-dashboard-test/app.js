@@ -72,6 +72,21 @@
       .integration-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
       .integration-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-radius:11px;background:#151923;border:1px solid #292e39}
       .integration-name{font-weight:800}.integration-state{color:#3bd98b;font-size:12px;font-weight:850}
+
+      .social-hub-loading{margin-top:10px}
+      .social-hub-data{margin-top:14px}
+      .social-hub-error{color:#ff8f8f}
+      .social-hub-empty{padding:14px;border:1px dashed #343a47;border-radius:12px;color:#a7adb8;background:#11151c}
+      .creator-list{display:grid;gap:10px}
+      .creator-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid #292e39;background:#151923;border-radius:12px}
+      .creator-card-main{min-width:0}
+      .creator-name{font-weight:850;font-size:16px}
+      .creator-platform{margin-top:4px;color:#8f96a3;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+      .creator-account{margin-top:4px;color:#c9ced8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .creator-profile{color:#f2b63d;text-decoration:none;font-size:12px;font-weight:850;white-space:nowrap}
+      .creator-profile:hover{text-decoration:underline}
+      .creator-summary{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+      .creator-summary-pill{padding:7px 10px;border-radius:999px;border:1px solid #343a47;background:#151923;color:#c9ced8;font-size:12px;font-weight:800}
       @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
     `;
     document.head.appendChild(style);
@@ -81,6 +96,108 @@
     const modal = document.getElementById("server-management-modal");
     if (modal) modal.remove();
     document.body.style.overflow = "";
+  }
+
+
+  async function loadSocialHub(guild, modal) {
+    const loading = modal.querySelector(".social-hub-loading");
+    const box = modal.querySelector(".social-hub-data");
+
+    if (!box || !guild || !guild.id) return;
+
+    try {
+      const response = await fetch(
+        "https://rozag.coolvetspaces.com/dashboard/api/server/" +
+          encodeURIComponent(String(guild.id)) +
+          "/social",
+        {
+          credentials: "include",
+          cache: "no-store"
+        }
+      );
+
+      const data = await response.json().catch(function () {
+        return null;
+      });
+
+      if (!response.ok || !data || !data.authenticated) {
+        throw new Error(
+          data && data.message ? data.message : "Social Hub request failed"
+        );
+      }
+
+      if (loading) loading.remove();
+
+      const accounts = Array.isArray(data.accounts) ? data.accounts : [];
+
+      if (!accounts.length) {
+        box.innerHTML =
+          '<div class="social-hub-empty">' +
+          escapeHtml(
+            data.message ||
+            "No connected creator accounts are currently associated with this server."
+          ) +
+          "</div>";
+        return;
+      }
+
+      const counts = {};
+      accounts.forEach(function (account) {
+        const key = String(account.platform || "Unknown");
+        counts[key] = (counts[key] || 0) + 1;
+      });
+
+      const summary = Object.keys(counts).sort().map(function (platform) {
+        return (
+          '<span class="creator-summary-pill">' +
+          escapeHtml(platform) +
+          " · " +
+          counts[platform] +
+          "</span>"
+        );
+      }).join("");
+
+      const cards = accounts.map(function (account) {
+        const profile = account.profile_url
+          ? '<a class="creator-profile" href="' +
+            escapeHtml(account.profile_url) +
+            '" target="_blank" rel="noopener noreferrer">View profile</a>'
+          : "";
+
+        return (
+          '<div class="creator-card">' +
+            '<div class="creator-card-main">' +
+              '<div class="creator-name">' +
+                escapeHtml(account.creator || "Unknown creator") +
+              "</div>" +
+              '<div class="creator-platform">' +
+                escapeHtml(account.platform || "Unknown platform") +
+              "</div>" +
+              '<div class="creator-account">' +
+                escapeHtml(
+                  account.username ||
+                  account.channel_id ||
+                  "Connected account"
+                ) +
+              "</div>" +
+            "</div>" +
+            profile +
+          "</div>"
+        );
+      }).join("");
+
+      box.innerHTML =
+        '<div class="creator-list">' + cards + "</div>" +
+        '<div class="creator-summary">' + summary + "</div>";
+
+    } catch (error) {
+      console.error("RoZAG Social Hub Phase 3A failed:", error);
+      if (loading) loading.remove();
+      box.innerHTML =
+        '<div class="social-hub-error">' +
+        "Unable to load Social Hub data right now." +
+        "</div>";
+    }
   }
 
   function openServerManagement(guild) {
@@ -141,7 +258,8 @@
 
           <div class="server-section">
             <h3>Social Hub</h3>
-            <p>The next phase will show this server's connected creator accounts, feed configuration and delivery settings.</p>
+            <p class="social-hub-loading">Loading connected creator accounts…</p>
+            <div class="social-hub-data"></div>
           </div>
 
           <div class="server-section">
@@ -154,6 +272,8 @@
 
     document.body.appendChild(modal);
     document.body.style.overflow = "hidden";
+
+    loadSocialHub(guild, modal);
 
     modal.querySelector(".server-modal-close").addEventListener("click", closeModal);
     modal.addEventListener("click", function (event) {
