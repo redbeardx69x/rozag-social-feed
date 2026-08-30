@@ -18,7 +18,11 @@
 
   if (logoutBtn) {
     logoutBtn.addEventListener("click", function () {
-      if (window.confirm("Are you sure you want to sign out of the RoZAG Dashboard?")) {
+      if (
+        window.confirm(
+          "Are you sure you want to sign out of the RoZAG Dashboard?"
+        )
+      ) {
         window.location.href = logoutUrl;
       }
     });
@@ -26,28 +30,44 @@
 
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, function (c) {
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }[c];
     });
   }
 
   function guildIconUrl(guild) {
     if (!guild || !guild.id || !guild.icon) return "";
-    return "https://cdn.discordapp.com/icons/" +
-      encodeURIComponent(guild.id) + "/" +
-      encodeURIComponent(guild.icon) + ".png?size=128";
+
+    return (
+      "https://cdn.discordapp.com/icons/" +
+      encodeURIComponent(guild.id) +
+      "/" +
+      encodeURIComponent(guild.icon) +
+      ".png?size=128"
+    );
   }
 
   function renderGuildIcon(guild) {
     const url = guildIconUrl(guild);
+
     return url
-      ? '<img src="' + url + '" alt="" class="guild-icon-img">'
+      ? '<img src="' +
+          url +
+          '" alt="" class="guild-icon-img">'
       : '<span class="guild-icon-fallback">⚓</span>';
   }
 
   function addStyles() {
     if (document.getElementById("rozag-phase2-styles")) return;
+
     const style = document.createElement("style");
     style.id = "rozag-phase2-styles";
+
     style.textContent = `
       .server-card .manage{transition:transform .16s ease,filter .16s ease}
       .server-card .manage:hover{transform:translateY(-1px);filter:brightness(1.08)}
@@ -74,17 +94,21 @@
       .integration-name{font-weight:800}.integration-state{color:#3bd98b;font-size:12px;font-weight:850}
       @media(max-width:700px){.server-modal-backdrop{padding:10px;align-items:flex-start}.server-modal{max-height:96vh}.server-overview-grid,.integration-list{grid-template-columns:1fr}.server-modal-head,.server-modal-body{padding:18px}}
     `;
+
     document.head.appendChild(style);
   }
 
   function closeModal() {
     const modal = document.getElementById("server-management-modal");
+
     if (modal) modal.remove();
+
     document.body.style.overflow = "";
   }
 
   function openServerManagement(guild) {
     if (!guild) return;
+
     closeModal();
 
     const modal = document.createElement("div");
@@ -93,7 +117,9 @@
 
     const access = guild.owner
       ? "Server Owner"
-      : (guild.administrator ? "Administrator" : "Manage Server");
+      : guild.administrator
+      ? "Administrator"
+      : "Manage Server";
 
     modal.innerHTML = `
       <div class="server-modal" role="dialog" aria-modal="true">
@@ -105,11 +131,13 @@
           </div>
           <button class="server-modal-close" type="button" aria-label="Close">×</button>
         </div>
+
         <div class="server-modal-body">
           <div class="server-status-banner">
             <span class="server-status-dot"></span>
             <strong>RoZAG access available</strong>
-            <span>•</span><span>Read-only test phase</span>
+            <span>•</span>
+            <span>Read-only test phase</span>
           </div>
 
           <div class="server-overview-grid">
@@ -117,10 +145,12 @@
               <div class="server-stat-label">Server access</div>
               <div class="server-stat-value">${escapeHtml(access)}</div>
             </div>
+
             <div class="server-stat">
               <div class="server-stat-label">Server ID</div>
               <div class="server-stat-value">${escapeHtml(guild.id || "Unknown")}</div>
             </div>
+
             <div class="server-stat">
               <div class="server-stat-label">RoZAG status</div>
               <div class="server-stat-value">Connected</div>
@@ -129,24 +159,49 @@
 
           <div class="server-section">
             <h3>Social Integrations</h3>
-            <p>Platform availability is displayed here only. No settings or accounts are changed in this phase.</p>
+            <p>
+              Platform availability is displayed here only.
+              No settings or accounts are changed in this phase.
+            </p>
+
             <div class="integration-list">
-              <div class="integration-row"><span class="integration-name">YouTube</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">TikTok</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">Twitch</span><span class="integration-state">Available</span></div>
-              <div class="integration-row"><span class="integration-name">Kick</span><span class="integration-state">Available</span></div>
+              <div class="integration-row">
+                <span class="integration-name">YouTube</span>
+                <span class="integration-state">Available</span>
+              </div>
+              <div class="integration-row">
+                <span class="integration-name">TikTok</span>
+                <span class="integration-state">Available</span>
+              </div>
+              <div class="integration-row">
+                <span class="integration-name">Twitch</span>
+                <span class="integration-state">Available</span>
+              </div>
+              <div class="integration-row">
+                <span class="integration-name">Kick</span>
+                <span class="integration-state">Available</span>
+              </div>
             </div>
-            <span class="readonly-pill">READ-ONLY • NO SETTINGS CHANGED</span>
+
+            <span class="readonly-pill">
+              READ-ONLY • NO SETTINGS CHANGED
+            </span>
           </div>
 
           <div class="server-section">
             <h3>Social Hub</h3>
-            <p>The next phase will show this server's connected creator accounts, feed configuration and delivery settings.</p>
+            <p>
+              The next phase will show this server's connected creator
+              accounts, feed configuration and delivery settings.
+            </p>
           </div>
 
           <div class="server-section">
             <h3>Bot &amp; Health</h3>
-            <p>Connection and heartbeat controls will be added after the read-only server view is validated.</p>
+            <p>
+              Connection and heartbeat controls will be added after
+              the read-only server view is validated.
+            </p>
           </div>
         </div>
       </div>
@@ -155,7 +210,10 @@
     document.body.appendChild(modal);
     document.body.style.overflow = "hidden";
 
-    modal.querySelector(".server-modal-close").addEventListener("click", closeModal);
+    modal
+      .querySelector(".server-modal-close")
+      .addEventListener("click", closeModal);
+
     modal.addEventListener("click", function (event) {
       if (event.target === modal) closeModal();
     });
@@ -168,38 +226,60 @@
     if (dash) dash.classList.remove("hidden");
     if (user) user.classList.remove("hidden");
 
-    const displayName = data.user?.global_name || data.user?.username || "Discord User";
+    const displayName =
+      data.user?.global_name ||
+      data.user?.username ||
+      "Discord User";
+
     const username = document.getElementById("username");
     const avatar = document.getElementById("avatar");
 
     if (username) username.textContent = displayName;
-    if (avatar) avatar.textContent = (data.user?.username || displayName || "D").slice(0, 1).toUpperCase();
+
+    if (avatar) {
+      avatar.textContent = (
+        data.user?.username ||
+        displayName ||
+        "D"
+      )
+        .slice(0, 1)
+        .toUpperCase();
+    }
 
     const list = Array.isArray(data.servers)
       ? data.servers
-      : (Array.isArray(data.guilds) ? data.guilds : []);
+      : Array.isArray(data.guilds)
+      ? data.guilds
+      : [];
 
     if (!servers) return;
 
     if (!list.length) {
-      servers.innerHTML = '<div class="empty">No manageable RoZAG servers were found.</div>';
+      servers.innerHTML =
+        '<div class="empty">No manageable RoZAG servers were found.</div>';
       return;
     }
 
-    servers.innerHTML = list.map(function (guild) {
-      return `
-        <article class="server-card">
-          <div class="server-head">
-            <div class="guild-icon">${renderGuildIcon(guild)}</div>
-            <div class="server-meta">
-              <h3>${escapeHtml(guild.name || "Unnamed Server")}</h3>
-              <span class="online">RoZAG access available</span>
+    servers.innerHTML = list
+      .map(function (guild) {
+        return `
+          <article class="server-card">
+            <div class="server-head">
+              <div class="guild-icon">${renderGuildIcon(guild)}</div>
+
+              <div class="server-meta">
+                <h3>${escapeHtml(guild.name || "Unnamed Server")}</h3>
+                <span class="online">RoZAG access available</span>
+              </div>
             </div>
-          </div>
-          <button class="btn primary manage" type="button">Manage Server</button>
-        </article>
-      `;
-    }).join("");
+
+            <button class="btn primary manage" type="button">
+              Manage Server
+            </button>
+          </article>
+        `;
+      })
+      .join("");
 
     servers.querySelectorAll(".manage").forEach(function (button, index) {
       button.addEventListener("click", function () {
@@ -211,11 +291,20 @@
   addStyles();
 
   if (me) {
-    fetch(me, {credentials:"include", cache:"no-store"})
-      .then(function (response) { return response.ok ? response.json() : null; })
+    fetch(me, {
+      credentials: "include",
+      cache: "no-store"
+    })
+      .then(function (response) {
+        if (!response.ok) return null;
+        return response.json();
+      })
       .then(render)
       .catch(function (error) {
-        console.error("RoZAG dashboard session check failed:", error);
+        console.error(
+          "RoZAG dashboard session check failed:",
+          error
+        );
       });
   }
 })();
