@@ -1,2 +1,969 @@
+(function () {
+  "use strict";
 
+  /*
+   * RoZAG Dashboard Phase 4
+   *
+   * The existing Social Hub bot remains the only Discord bot.
+   * The dashboard talks to the Phase 4 backend.
+   */
 
+  const cfg = window.ROZAG_DASHBOARD_CONFIG || {};
+  const auth = cfg.AUTH_START_URL || "#";
+  const me = cfg.AUTH_ME_URL || "";
+  const serverApiBase =
+    cfg.SERVER_API_BASE_URL ||
+    (me ? me.replace(/\/api\/me\/?$/, "/api/server/") : "");
+
+  const login = document.getElementById("login");
+  const dash = document.getElementById("dashboard");
+  const user = document.getElementById("user");
+  const servers = document.getElementById("servers");
+
+  const loginBtn = document.getElementById("loginBtn");
+  const logout = document.getElementById("logout");
+
+  if (loginBtn) loginBtn.href = auth;
+
+  if (logout) {
+    logout.addEventListener("click", function () {
+      location.href = cfg.LOGOUT_URL || "./";
+    });
+  }
+
+  const PLATFORM_META = {
+    youtube: { icon: "🎬", name: "YouTube" },
+    twitch: { icon: "🔴", name: "Twitch" },
+    tiktok: { icon: "🎵", name: "TikTok" },
+    kick: { icon: "🟢", name: "Kick" },
+  };
+
+  function escapeHtml(value) {
+    return String(value == null ? "" : value).replace(
+      /[&<>"']/g,
+      function (c) {
+        return {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        }[c];
+      }
+    );
+  }
+
+  function platformMeta(platform) {
+    return PLATFORM_META[String(platform || "").toLowerCase()] || {
+      icon: "📡",
+      name: String(platform || "Unknown").toUpperCase()
+    };
+  }
+
+  function addStyles() {
+    if (document.getElementById("rozag-phase4-styles")) return;
+
+    const style = document.createElement("style");
+    style.id = "rozag-phase4-styles";
+    style.textContent = `
+      .rozag-p4-actions{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        margin:0 0 18px;
+      }
+
+      .rozag-p4-btn{
+        appearance:none;
+        border:1px solid #414753;
+        border-radius:10px;
+        padding:10px 14px;
+        background:#1a1e27;
+        color:#fff;
+        cursor:pointer;
+        font-weight:800;
+      }
+
+      .rozag-p4-btn.primary{
+        border-color:#b91c2b;
+        background:#e21d2e;
+      }
+
+      .rozag-p4-btn.danger{
+        border-color:#6b2730;
+        color:#ff9da5;
+      }
+
+      .rozag-p4-btn:disabled{
+        opacity:.55;
+        cursor:not-allowed;
+      }
+
+      .rozag-p4-form{
+        display:grid;
+        gap:14px;
+        padding:18px;
+        margin-bottom:18px;
+        background:#0f1218;
+        border:1px solid #292e39;
+        border-radius:15px;
+      }
+
+      .rozag-p4-form label{
+        display:grid;
+        gap:7px;
+        color:#b8bdc7;
+        font-size:12px;
+        font-weight:800;
+      }
+
+      .rozag-p4-form input{
+        width:100%;
+        box-sizing:border-box;
+        border:1px solid #3a404c;
+        border-radius:10px;
+        background:#171b23;
+        color:#fff;
+        padding:12px;
+        outline:none;
+      }
+
+      .rozag-p4-form input:focus{
+        border-color:#e21d2e;
+      }
+
+      .rozag-member-results{
+        display:grid;
+        gap:6px;
+        max-height:220px;
+        overflow:auto;
+        margin-top:-5px;
+      }
+
+      .rozag-member{
+        width:100%;
+        text-align:left;
+        border:1px solid #303641;
+        border-radius:10px;
+        background:#151923;
+        color:#fff;
+        padding:10px 12px;
+        cursor:pointer;
+      }
+
+      .rozag-member:hover{
+        border-color:#e21d2e;
+      }
+
+      .rozag-member strong{
+        display:block;
+      }
+
+      .rozag-member small{
+        display:block;
+        margin-top:3px;
+        color:#8f96a2;
+      }
+
+      .rozag-selected-member{
+        padding:10px 12px;
+        border-radius:10px;
+        background:#141923;
+        border:1px solid rgba(59,217,139,.35);
+        color:#9de9bc;
+      }
+
+      .rozag-help{
+        color:#8f96a2;
+        font-size:12px;
+        line-height:1.5;
+      }
+
+      .rozag-success{
+        padding:14px;
+        margin-bottom:14px;
+        border-radius:12px;
+        background:rgba(59,217,139,.08);
+        border:1px solid rgba(59,217,139,.3);
+        color:#a8edc3;
+      }
+
+      .rozag-account-actions{
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+        margin-top:9px;
+      }
+
+      .rozag-account{
+        position:relative;
+      }
+
+      #avatar{
+        width:42px;
+        height:42px;
+        min-width:42px;
+        border-radius:50%;
+        overflow:hidden;
+        display:grid;
+        place-items:center;
+        background:#252b36;
+        color:#fff;
+        font-weight:900;
+        border:1px solid #3a404c;
+      }
+
+      #avatar img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+      }
+
+      .rozag-modal-backdrop{
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding:24px;
+        background:rgba(0,0,0,.78);
+        backdrop-filter:blur(8px);
+      }
+
+      .rozag-modal-backdrop.open{display:flex;}
+
+      .rozag-modal{
+        width:min(1040px,96vw);
+        max-height:90vh;
+        overflow:auto;
+        background:linear-gradient(180deg,#171a22 0%,#0d1016 100%);
+        border:1px solid #3a404c;
+        border-radius:22px;
+        box-shadow:0 30px 100px rgba(0,0,0,.75),0 0 0 1px rgba(226,29,46,.16);
+        color:#f5f6f8;
+      }
+
+      .rozag-modal-head{
+        position:sticky;
+        top:0;
+        z-index:2;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:20px;
+        padding:22px 24px;
+        background:rgba(13,16,22,.96);
+        border-bottom:1px solid #292e39;
+      }
+
+      .rozag-modal-title{margin:0;font-size:25px;line-height:1.15;}
+      .rozag-modal-subtitle{margin:6px 0 0;color:#9fa5b0;font-size:13px;}
+      .rozag-modal-close{width:40px;height:40px;border:1px solid #414753;border-radius:10px;background:#1a1e27;color:#fff;font-size:22px;cursor:pointer;}
+      .rozag-modal-body{padding:24px;}
+      .rozag-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
+      .rozag-summary-card{padding:16px;background:#11141b;border:1px solid #292e39;border-radius:14px;}
+      .rozag-summary-label{color:#8f96a2;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;}
+      .rozag-summary-value{margin-top:6px;font-size:24px;font-weight:900;}
+      .rozag-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 12px;}
+      .rozag-section-title h3{margin:0;font-size:18px;}
+      .rozag-section-title span{color:#8f96a2;font-size:12px;}
+      .rozag-accounts{display:grid;gap:10px;}
+      .rozag-account{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:14px;padding:14px;background:#11141b;border:1px solid #292e39;border-radius:14px;}
+      .rozag-account-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:12px;background:#1b1f28;font-size:23px;}
+      .rozag-account-name{margin:0;font-size:15px;font-weight:900;}
+      .rozag-account-user{margin:4px 0 0;color:#a7adb7;font-size:13px;}
+      .rozag-account-meta{margin-top:6px;color:#7f8793;font-size:11px;}
+      .rozag-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:#1a1e26;border:1px solid #353b47;color:#c8ccd3;font-size:11px;font-weight:800;white-space:nowrap;}
+      .rozag-badge.connected{border-color:rgba(59,217,139,.35);color:#70e7a7;}
+      .rozag-badge.route{margin-top:6px;border-color:rgba(226,29,46,.3);color:#ff777f;}
+      .rozag-platform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+      .rozag-platform{padding:16px;background:#11141b;border:1px solid #292e39;border-radius:14px;}
+      .rozag-platform-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+      .rozag-platform-name{display:flex;align-items:center;gap:8px;font-weight:900;}
+      .rozag-platform-count{font-size:22px;font-weight:900;}
+      .rozag-platform-state{margin-top:9px;color:#969da8;font-size:12px;}
+      .rozag-routing{display:grid;gap:9px;}
+      .rozag-route-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 14px;background:#11141b;border:1px solid #292e39;border-radius:12px;}
+      .rozag-route-name{display:flex;align-items:center;gap:8px;font-weight:800;}
+      .rozag-route-channel{color:#a8aeb8;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;text-align:right;}
+      .rozag-empty{padding:22px;color:#9299a5;text-align:center;background:#11141b;border:1px dashed #343a46;border-radius:14px;}
+      .rozag-error{padding:16px;color:#ff9aa0;background:rgba(226,29,46,.08);border:1px solid rgba(226,29,46,.3);border-radius:12px;}
+      .rozag-loading{padding:40px;color:#9fa5b0;text-align:center;}
+
+      @media(max-width:820px){
+        .rozag-summary,.rozag-platform-grid{grid-template-columns:1fr 1fr;}
+        .rozag-account{grid-template-columns:42px minmax(0,1fr);}
+        .rozag-account>div:last-child{grid-column:2;justify-self:start;}
+      }
+      @media(max-width:560px){
+        .rozag-summary,.rozag-platform-grid{grid-template-columns:1fr;}
+        .rozag-modal-backdrop{padding:8px;}
+        .rozag-modal-body{padding:16px;}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function ensureModal() {
+    if (document.getElementById("rozagManagementModal")) return;
+
+    const backdrop = document.createElement("div");
+    backdrop.id = "rozagManagementModal";
+    backdrop.className = "rozag-modal-backdrop";
+    backdrop.innerHTML = `
+      <div class="rozag-modal" role="dialog" aria-modal="true">
+        <div class="rozag-modal-head">
+          <div>
+            <h2 class="rozag-modal-title" id="rozagModalTitle">Server Management</h2>
+            <p class="rozag-modal-subtitle" id="rozagModalSubtitle">Loading…</p>
+          </div>
+          <button type="button" class="rozag-modal-close" id="rozagModalClose">×</button>
+        </div>
+        <div class="rozag-modal-body" id="rozagModalBody">
+          <div class="rozag-loading">Loading…</div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(backdrop);
+
+    document.getElementById("rozagModalClose").addEventListener(
+      "click",
+      closeModal
+    );
+
+    backdrop.addEventListener("click", function (event) {
+      if (event.target === backdrop) closeModal();
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeModal();
+    });
+  }
+
+  function closeModal() {
+    const modal = document.getElementById("rozagManagementModal");
+    if (modal) modal.classList.remove("open");
+  }
+
+  function apiUrl(path) {
+    return serverApiBase.replace(/\/+$/, "") + path;
+  }
+
+  function fetchJson(url, options) {
+    return fetch(url, Object.assign({
+      credentials: "include",
+      cache: "no-store"
+    }, options || {})).then(function (response) {
+      return response.json().then(function (data) {
+        if (!response.ok) {
+          throw new Error(
+            data && (data.message || data.error)
+              ? (data.message || data.error)
+              : "HTTP " + response.status
+          );
+        }
+        return data;
+      });
+    });
+  }
+
+  function openManagementModal(guildId, guildName) {
+    ensureModal();
+
+    const modal = document.getElementById("rozagManagementModal");
+    const title = document.getElementById("rozagModalTitle");
+    const subtitle = document.getElementById("rozagModalSubtitle");
+    const body = document.getElementById("rozagModalBody");
+
+    title.textContent = "Manage " + (guildName || "Server");
+    subtitle.textContent = "Social accounts and members";
+    body.innerHTML = '<div class="rozag-loading">Loading RoZAG server data…</div>';
+    modal.classList.add("open");
+
+    fetchJson(
+      apiUrl("/" + encodeURIComponent(String(guildId)))
+    ).then(function (data) {
+      renderServerManagement(guildId, guildName, data);
+    }).catch(function (error) {
+      body.innerHTML =
+        '<div class="rozag-error">' +
+        escapeHtml("Could not load this server: " + error.message) +
+        "</div>";
+    });
+  }
+
+  function renderServerManagement(guildId, guildName, data) {
+    const body = document.getElementById("rozagModalBody");
+
+    const accounts = Array.isArray(data.accounts) ? data.accounts : [];
+    const platforms = (Array.isArray(data.platforms) ? data.platforms : [])
+      .filter(function (platform) {
+        return !!PLATFORM_META[String(platform.platform || "").toLowerCase()];
+      });
+const counts = data.platform_counts || {};
+
+    const connectedPlatformCount = platforms.filter(function (p) {
+      return p.status === "connected";
+    }).length;
+
+    const memberCount = accounts.filter(function (a) {
+      return a.association_type !== "watch";
+    }).length;
+
+    const watchCount = accounts.filter(function (a) {
+      return a.association_type === "watch";
+    }).length;
+
+    const accountCards = accounts.length
+      ? accounts.map(function (account) {
+          const meta = platformMeta(account.platform);
+          const route = account.feed || {};
+
+          return (
+            '<article class="rozag-account">' +
+              '<div class="rozag-account-icon">' + meta.icon + '</div>' +
+              '<div>' +
+                '<h4 class="rozag-account-name">' +
+                  escapeHtml(account.creator_name) +
+                '</h4>' +
+                '<p class="rozag-account-user">' +
+                  escapeHtml(
+                    account.username
+                      ? "@" + String(account.username).replace(/^@/, "")
+                      : "No username recorded"
+                  ) +
+                '</p>' +
+                '<div class="rozag-account-meta">' +
+                  escapeHtml(meta.name) +
+                  " · " +
+                  escapeHtml(
+                    account.association_type === "watch"
+                      ? "Creator Watch"
+                      : "Member"
+                  ) +
+                  (
+                    account.discord_user_id
+                      ? " · Discord member linked"
+                      : ""
+                  ) +
+                '</div>' +
+                '<div class="rozag-account-actions">' +
+                  '<button type="button" class="rozag-p4-btn" data-edit-account="' +
+                    escapeHtml(String(account.social_account_id)) +
+                  '">Edit</button>' +
+                  '<button type="button" class="rozag-p4-btn danger" data-remove-account="' +
+                    escapeHtml(String(account.social_account_id)) +
+                  '">Remove</button>' +
+                '</div>' +
+              '</div>' +
+              '<div>' +
+                '<span class="rozag-badge connected">● Connected</span>' +
+                '<div>' +
+                  (
+                    route.channel_id
+                      ? '<span class="rozag-badge route">Feed routed</span>'
+                      : '<span class="rozag-badge">No feed route</span>'
+                  ) +
+                '</div>' +
+              '</div>' +
+            '</article>'
+          );
+        }).join("")
+      : '<div class="rozag-empty">No connected creator accounts are registered for this server.</div>';
+
+    const platformCards = platforms.map(function (platform) {
+      const count = Number(counts[platform.platform] || 0);
+
+      if (platform.status === "coming_soon") {
+        return (
+          '<article class="rozag-platform coming-soon">' +
+            '<div class="rozag-platform-top">' +
+              '<div class="rozag-platform-name">' +
+                platform.icon + " " + escapeHtml(platform.name) +
+              '</div>' +
+              '<div class="rozag-platform-count">—</div>' +
+            '</div>' +
+            '<div class="rozag-platform-state">Coming Soon</div>' +
+          '</article>'
+        );
+      }
+
+      return (
+        '<article class="rozag-platform">' +
+          '<div class="rozag-platform-top">' +
+            '<div class="rozag-platform-name">' +
+              platform.icon + " " + escapeHtml(platform.name) +
+            '</div>' +
+            '<div class="rozag-platform-count">' + count + '</div>' +
+          '</div>' +
+          '<div class="rozag-platform-state">' +
+            (count > 0
+              ? "Connected creator account" + (count === 1 ? "" : "s")
+              : "No connected accounts") +
+          '</div>' +
+        '</article>'
+      );
+    }).join("");
+
+    body.innerHTML =
+      '<div class="rozag-p4-actions">' +
+        '<button type="button" class="rozag-p4-btn primary" id="rozagAddAccount">＋ Add Social Account</button>' +
+        '<button type="button" class="rozag-p4-btn" id="rozagRefresh">↻ Refresh</button>' +
+      '</div>' +
+
+      '<div id="rozagAddPanel"></div>' +
+
+      '<div class="rozag-summary">' +
+        '<div class="rozag-summary-card"><div class="rozag-summary-label">Connected Accounts</div><div class="rozag-summary-value">' +
+          accounts.length +
+        '</div></div>' +
+        '<div class="rozag-summary-card"><div class="rozag-summary-label">Platforms Used</div><div class="rozag-summary-value">' +
+          connectedPlatformCount +
+        '</div></div>' +
+        '<div class="rozag-summary-card"><div class="rozag-summary-label">Members</div><div class="rozag-summary-value">' +
+          memberCount +
+        '</div></div>' +
+        '<div class="rozag-summary-card"><div class="rozag-summary-label">Creator Watch</div><div class="rozag-summary-value">' +
+          watchCount +
+        '</div></div>' +
+      '</div>' +
+
+      '<div class="rozag-section-title"><h3>Connected Creator Accounts</h3><span>Same account relationship used by /social add</span></div>' +
+      '<div class="rozag-accounts">' + accountCards + '</div>' +
+
+      '<div class="rozag-section-title"><h3>Platform Connection Status</h3><span>Actual connected accounts</span></div>' +
+      '<div class="rozag-platform-grid">' + platformCards + '</div>';
+
+document.getElementById("rozagAddAccount").addEventListener(
+      "click",
+      function () {
+        showAddPanel(guildId);
+      }
+    );
+
+    document.getElementById("rozagRefresh").addEventListener(
+      "click",
+      function () {
+        openManagementModal(guildId, guildName);
+      }
+    );
+
+    body.querySelectorAll("[data-edit-account]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const accountId = button.getAttribute("data-edit-account");
+        const account = accounts.find(function (a) { return String(a.social_account_id) === String(accountId); });
+        if (account) showEditPanel(guildId, account);
+      });
+    });
+
+    body.querySelectorAll("[data-remove-account]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        const accountId = button.getAttribute("data-remove-account");
+
+        if (!confirm("Remove this social account from this server?")) {
+          return;
+        }
+
+        button.disabled = true;
+
+        fetchJson(
+          apiUrl(
+            "/" +
+            encodeURIComponent(String(guildId)) +
+            "/social/" +
+            encodeURIComponent(String(accountId))
+          ),
+          { method: "DELETE" }
+        ).then(function () {
+          openManagementModal(guildId, guildName);
+        }).catch(function (error) {
+          button.disabled = false;
+          alert("Remove failed: " + error.message);
+        });
+      });
+    });
+  }
+
+  function showAddPanel(guildId) {
+    const panel = document.getElementById("rozagAddPanel");
+    if (!panel) return;
+
+    panel.innerHTML = `
+      <div class="rozag-p4-form">
+        <label>
+          Creator / Channel Profile URL
+          <input id="rozagSocialUrl" type="url" placeholder="https://www.tiktok.com/@username">
+        </label>
+
+        <label>
+          Discord Member
+          <input id="rozagMemberSearch" type="text" autocomplete="off" placeholder="Type a member name…">
+        </label>
+
+        <div id="rozagSelectedMember"></div>
+        <div id="rozagMemberResults" class="rozag-member-results"></div>
+
+        <div class="rozag-help">
+          This member is the Discord account that owns the social creator.
+          TikTok and Kick authorization messages will be sent to this member by the existing RoZAG Social bot.
+        </div>
+
+        <div class="rozag-p4-actions">
+          <button type="button" class="rozag-p4-btn primary" id="rozagSaveSocial">Add Account</button>
+          <button type="button" class="rozag-p4-btn" id="rozagCancelAdd">Cancel</button>
+        </div>
+
+        <div id="rozagAddResult"></div>
+      </div>
+    `;
+
+    let selectedMember = null;
+    let searchTimer = null;
+
+    const searchInput = document.getElementById("rozagMemberSearch");
+    const results = document.getElementById("rozagMemberResults");
+    const selected = document.getElementById("rozagSelectedMember");
+    const save = document.getElementById("rozagSaveSocial");
+    const cancel = document.getElementById("rozagCancelAdd");
+    const urlInput = document.getElementById("rozagSocialUrl");
+    const resultBox = document.getElementById("rozagAddResult");
+
+    function setSelectedMember(member) {
+      selectedMember = member;
+
+      selected.innerHTML =
+        '<div class="rozag-selected-member">' +
+          '✓ Selected: <strong>' +
+          escapeHtml(
+            member.global_name ||
+            member.nick ||
+            member.username ||
+            member.id
+          ) +
+          '</strong>' +
+          '<small>' +
+          escapeHtml(
+            member.username
+              ? "@" + member.username + " · " + member.id
+              : member.id
+          ) +
+          '</small>' +
+        '</div>';
+
+      results.innerHTML = "";
+      searchInput.value =
+        member.global_name ||
+        member.nick ||
+        member.username ||
+        "";
+    }
+
+    searchInput.addEventListener("input", function () {
+      selectedMember = null;
+      selected.innerHTML = "";
+
+      const query = searchInput.value.trim();
+
+      if (searchTimer) clearTimeout(searchTimer);
+
+      if (query.length < 2) {
+        results.innerHTML = "";
+        return;
+      }
+
+      searchTimer = setTimeout(function () {
+        results.innerHTML =
+          '<div class="rozag-help">Searching Discord members…</div>';
+
+        fetchJson(
+          apiUrl(
+            "/" +
+            encodeURIComponent(String(guildId)) +
+            "/members?query=" +
+            encodeURIComponent(query)
+          )
+        ).then(function (data) {
+          if (!data.members.length) {
+            results.innerHTML =
+              '<div class="rozag-help">No matching server members found.</div>';
+            return;
+          }
+
+          results.innerHTML = data.members.map(function (member) {
+            const display =
+              member.global_name ||
+              member.nick ||
+              member.username ||
+              member.id;
+
+            return (
+              '<button type="button" class="rozag-member" data-member-id="' +
+                escapeHtml(member.id) +
+              '">' +
+                '<strong>' + escapeHtml(display) + '</strong>' +
+                '<small>' +
+                  escapeHtml(
+                    member.username
+                      ? "@" + member.username
+                      : member.id
+                  ) +
+                '</small>' +
+              '</button>'
+            );
+          }).join("");
+
+          results.querySelectorAll("[data-member-id]").forEach(function (button) {
+            button.addEventListener("click", function () {
+              const id = button.getAttribute("data-member-id");
+              const member = data.members.find(function (m) {
+                return String(m.id) === String(id);
+              });
+
+              if (member) setSelectedMember(member);
+            });
+          });
+        }).catch(function (error) {
+          results.innerHTML =
+            '<div class="rozag-error">' +
+            escapeHtml("Member search failed: " + error.message) +
+            "</div>";
+        });
+      }, 250);
+    });
+
+    cancel.addEventListener("click", function () {
+      panel.innerHTML = "";
+    });
+
+    save.addEventListener("click", function () {
+      const url = urlInput.value.trim();
+
+      if (!url) {
+        alert("Enter the creator/channel profile URL.");
+        return;
+      }
+
+      if (!selectedMember) {
+        alert("Select the Discord member who owns the creator account.");
+        return;
+      }
+
+      save.disabled = true;
+      resultBox.innerHTML =
+        '<div class="rozag-help">Resolving the social profile and registering it…</div>';
+
+      fetchJson(
+        apiUrl(
+          "/" +
+          encodeURIComponent(String(guildId)) +
+          "/social"
+        ),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            url: url,
+            member_id: selectedMember.id
+          })
+        }
+      ).then(function (data) {
+        let html =
+          '<div class="rozag-success">' +
+            '<strong>✓ Account added.</strong><br>' +
+            escapeHtml(data.creator) +
+            " · " +
+            escapeHtml(data.platform) +
+            "<br>" +
+            "Feed channel: " +
+            escapeHtml(data.feed_channel?.name || data.feed_channel?.id || "created") +
+          '</div>';
+
+        if (data.authorization_required) {
+          html +=
+            '<div class="rozag-help">' +
+              (
+                data.authorization_sent
+                  ? "🔐 The existing RoZAG Social bot sent the authorization DM to the selected Discord member."
+                  : "⚠️ The authorization DM could not be sent. Use the authorization link below."
+              ) +
+            '</div>';
+
+          if (data.authorization_url) {
+            html +=
+              '<p><a target="_blank" rel="noopener" href="' +
+                escapeHtml(data.authorization_url) +
+              '">Open authorization link</a></p>';
+          }
+        }
+
+        resultBox.innerHTML = html;
+
+        setTimeout(function () {
+          openManagementModal(guildId, guildName);
+        }, 900);
+      }).catch(function (error) {
+        save.disabled = false;
+        resultBox.innerHTML =
+          '<div class="rozag-error">' +
+          escapeHtml("Add failed: " + error.message) +
+          "</div>";
+      });
+    });
+
+    urlInput.focus();
+  }
+
+  function showEditPanel(guildId, account) {
+    const panel = document.getElementById("rozagAddPanel");
+    if (!panel) return;
+    panel.innerHTML = `
+      <div class="rozag-p4-form">
+        <label>Creator / Channel Profile URL
+          <input id="rozagSocialUrl" type="url" value="${escapeHtml(account.profile_url || "")}">
+        </label>
+        <label>Discord Member
+          <input id="rozagMemberSearch" type="text" autocomplete="off" placeholder="Search a server member…">
+        </label>
+        <div id="rozagSelectedMember"></div>
+        <div id="rozagMemberResults" class="rozag-member-results"></div>
+        <div class="rozag-help">Edit keeps the existing platform. To change platform, remove the account and add the new platform.</div>
+        <div class="rozag-p4-actions">
+          <button type="button" class="rozag-p4-btn primary" id="rozagSaveSocial">Save Changes</button>
+          <button type="button" class="rozag-p4-btn" id="rozagCancelAdd">Cancel</button>
+        </div>
+        <div id="rozagAddResult"></div>
+      </div>`;
+    let selectedMember = account.discord_user_id ? {id:String(account.discord_user_id)} : null;
+    const searchInput=document.getElementById("rozagMemberSearch"), results=document.getElementById("rozagMemberResults"), selected=document.getElementById("rozagSelectedMember"), save=document.getElementById("rozagSaveSocial"), cancel=document.getElementById("rozagCancelAdd"), urlInput=document.getElementById("rozagSocialUrl"), resultBox=document.getElementById("rozagAddResult");
+    if(selectedMember) selected.innerHTML='<div class="rozag-selected-member">✓ Current Discord member: <strong>'+escapeHtml(account.discord_user_id)+'</strong></div>';
+    let timer=null;
+    searchInput.addEventListener("input",function(){
+      selectedMember=null; selected.innerHTML=""; const q=searchInput.value.trim(); if(timer) clearTimeout(timer); if(q.length<2){results.innerHTML="";return;}
+      timer=setTimeout(function(){
+        results.innerHTML='<div class="rozag-help">Searching Discord members…</div>';
+        fetchJson(apiUrl("/"+encodeURIComponent(String(guildId))+"/members?query="+encodeURIComponent(q))).then(function(data){
+          if(!data.members.length){results.innerHTML='<div class="rozag-help">No matching server members found.</div>';return;}
+          results.innerHTML=data.members.map(function(m){const d=m.global_name||m.nick||m.username||m.id;return '<button type="button" class="rozag-member" data-member-id="'+escapeHtml(m.id)+'"><strong>'+escapeHtml(d)+'</strong><small>'+escapeHtml(m.username?"@"+m.username:m.id)+'</small></button>';}).join("");
+          results.querySelectorAll("[data-member-id]").forEach(function(b){b.addEventListener("click",function(){const id=b.getAttribute("data-member-id");selectedMember=data.members.find(function(m){return String(m.id)===String(id);});if(!selectedMember)return;selected.innerHTML='<div class="rozag-selected-member">✓ Selected: <strong>'+escapeHtml(selectedMember.global_name||selectedMember.nick||selectedMember.username||selectedMember.id)+'</strong></div>';results.innerHTML="";searchInput.value=selectedMember.global_name||selectedMember.nick||selectedMember.username||"";});});
+        }).catch(function(e){results.innerHTML='<div class="rozag-error">Member search failed: '+escapeHtml(e.message)+'</div>';});
+      },250);
+    });
+    cancel.addEventListener("click",function(){panel.innerHTML="";});
+    save.addEventListener("click",function(){
+      if(!urlInput.value.trim()){alert("Enter the creator/channel profile URL.");return;}
+      if(!selectedMember||!selectedMember.id){alert("Select the Discord member who owns the creator account.");return;}
+      save.disabled=true; resultBox.innerHTML='<div class="rozag-help">Saving changes…</div>';
+      fetchJson(apiUrl("/"+encodeURIComponent(String(guildId))+"/social/"+encodeURIComponent(String(account.social_account_id))),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:urlInput.value.trim(),member_id:selectedMember.id})}).then(function(){resultBox.innerHTML='<div class="rozag-success"><strong>✓ Changes saved.</strong></div>';setTimeout(function(){openManagementModal(guildId,"");},700);}).catch(function(e){save.disabled=false;resultBox.innerHTML='<div class="rozag-error">Edit failed: '+escapeHtml(e.message)+'</div>';});
+    });
+  }
+
+  function render(data) {
+    if (!data || !data.authenticated) return;
+
+    if (login) login.classList.add("hidden");
+    if (dash) dash.classList.remove("hidden");
+    if (user) user.classList.remove("hidden");
+
+    const usernameEl = document.getElementById("username");
+    const avatarEl = document.getElementById("avatar");
+
+    if (usernameEl) {
+      usernameEl.textContent =
+        data.user?.global_name ||
+        data.user?.username ||
+        "Discord User";
+    }
+
+    if (avatarEl) {
+      const discordUser = data.user || {};
+      const userId = discordUser.id ? String(discordUser.id) : "";
+      const avatarHash = discordUser.avatar ? String(discordUser.avatar) : "";
+
+      if (userId && avatarHash) {
+        const extension = avatarHash.startsWith("a_") ? "gif" : "png";
+        avatarEl.innerHTML =
+          '<img src="https://cdn.discordapp.com/avatars/' +
+          encodeURIComponent(userId) +
+          '/' +
+          encodeURIComponent(avatarHash) +
+          '.' + extension +
+          '?size=128" alt="Discord profile avatar">';
+      } else {
+        avatarEl.textContent =
+          (discordUser.global_name || discordUser.username || "D")
+            .slice(0, 1)
+            .toUpperCase();
+      }
+    }
+
+    if (!servers) return;
+
+    const list = Array.isArray(data.servers) ? data.servers : [];
+
+    if (!list.length) {
+      servers.innerHTML =
+        '<div class="empty">No manageable RoZAG servers were found.</div>';
+      return;
+    }
+
+    servers.innerHTML = list.map(function (g) {
+      const icon = g.icon
+        ? '<img src="https://cdn.discordapp.com/icons/' +
+          encodeURIComponent(String(g.id || "")) +
+          "/" +
+          encodeURIComponent(String(g.icon)) +
+          '.png?size=128" alt="" style="width:100%;height:100%;border-radius:12px;object-fit:cover;">'
+        : "🏴‍☠️";
+
+      return (
+        '<article class="server-card">' +
+          '<div class="server-head">' +
+            '<div class="guild-icon">' + icon + '</div>' +
+            '<div class="server-meta">' +
+              '<h3>' + escapeHtml(g.name || "Unnamed Server") + '</h3>' +
+              '<span class="online">RoZAG access available</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="btn primary manage" data-guild="' +
+            escapeHtml(String(g.id || "")) +
+          '">Manage Server</button>' +
+        '</article>'
+      );
+    }).join("");
+
+    servers.querySelectorAll(".manage").forEach(function (button) {
+      button.addEventListener("click", function () {
+        openManagementModal(
+          button.getAttribute("data-guild"),
+          button.closest(".server-card")?.querySelector("h3")?.textContent ||
+          "Server"
+        );
+      });
+    });
+  }
+
+  addStyles();
+
+  if (me) {
+    fetch(me, {
+      credentials: "include",
+      cache: "no-store"
+    })
+      .then(function (response) {
+        if (!response.ok) {
+          if (response.status === 401) return null;
+          throw new Error("HTTP " + response.status);
+        }
+        return response.json();
+      })
+      .then(render)
+      .catch(function (error) {
+        console.error("RoZAG dashboard session lookup failed:", error);
+      });
+  }
+})();
