@@ -1,18 +1,11 @@
-ROZAG SOCIAL HUB — GITHUB PAGES DEPLOYMENT
-===============================================
+MAIN WEBSITE ONLY — RoZAG Social Feed
 
-Repository:
-  redbeardx69x.github.io/rozag-social-feed/
+Replace the ROOT index.html on GitHub Pages with this index.html.
+Do NOT put it in dashboard/.
+Do NOT replace the dashboard files.
 
-Upload ALL files in this package to the repository root.
+This version restores the full main-page content. The ONLY status item removed from the hero status card is the individual YouTube/TikTok/Twitch/Kick online strip, as requested. Discord Bot, Servers connected, and Last heartbeat remain.
 
-Important fixes in this version:
-- All website assets use relative paths (./styles.css, ./app.js, etc.).
-- Internal page links use explicit .html files, which works on GitHub Pages.
-- config.js now exports window.ROZAG_CONFIG correctly.
-- The frontend status API points to:
-    https://rozag.coolvetspaces.com/api/status
-- Discord install and support links open in a new tab.
-- favicon.ico and rozag-logo.png are included.
-
-The GitHub Pages frontend does NOT contain platform credentials or secrets.
+The Dashboard navigation link and Open Dashboard button point to dashboard/.
+The browser title and homepage brand use the exact TikTok app name: RoZAG Social Feed.
+Policy links use terms-of-service.html and privacy-policy.html.
