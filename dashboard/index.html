@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>RoZAG Social Hub Dashboard</title>
+  <title>RoZAG Social Feed Dashboard</title>
   <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
   <link rel="apple-touch-icon" href="./favicon.png">
   <script src="./config.js"></script>
@@ -16,7 +16,7 @@
     .hidden{display:none!important}
 
     .topbar{height:72px;border-bottom:1px solid #292e39;background:rgba(7,9,13,.94);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
-    .topbar-inner{width:100%;max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .topbar-inner{width:100%;max-width:1388px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
     .brand,.brand:visited,.brand:hover,.brand:active{color:#f5f6f8!important;text-decoration:none}
     .brand small{color:#8e95a1!important}
     .status-panel{margin:0 0 24px;background:linear-gradient(180deg,rgba(16,20,28,.96),rgba(10,13,18,.96));border:1px solid #303641;border-radius:18px;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.28)}
@@ -48,7 +48,7 @@
       .status-platform:last-child{border-right:0}
       .status-logo{width:62px;height:62px}
     }
-    .topbar{height:72px;border-bottom:1px solid #292e39;background:rgba(7,9,13,.94);display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
+    .topbar{height:72px;border-bottom:1px solid #292e39;background:rgba(7,9,13,.94);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20;backdrop-filter:blur(12px)}
     .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.02em;text-decoration:none;color:var(--text)}.brand-mark{width:42px;height:42px;border-radius:11px;overflow:hidden;display:grid;place-items:center;background:#0b0d12;border:1px solid #3b414c}.brand-mark img{width:100%;height:100%;object-fit:cover}.brand small{display:block;color:#8e95a1;font-size:9px;letter-spacing:.16em}
     .user{display:flex;align-items:center;gap:12px}.avatar{width:38px;height:38px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#252b36;border:1px solid #3d4552;font-weight:900}.avatar img{width:100%;height:100%;object-fit:cover}.username{font-weight:800}.logout{border:1px solid #765b00;background:#15130b;color:#f0bf31;border-radius:10px;padding:9px 13px;font-weight:800;cursor:pointer;text-decoration:none}
     main{max-width:1120px;margin:0 auto;padding:58px 24px 80px}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.16em;color:#f2c52f;text-transform:uppercase}.hero h1{font-size:46px;line-height:.98;margin:10px 0 12px;max-width:650px}.hero h1 span{color:#ff3948}.hero p{max-width:650px;color:#a0a7b3;line-height:1.6;margin:0 0 36px}
@@ -63,7 +63,7 @@
 <body>
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="./"><div class="brand-mark"><img src="./rozag-logo.png" alt="RoZAG"></div><div>ROZAG SOCIAL HUB<small>SERVER MANAGEMENT DASHBOARD</small></div></a>
+    <a class="brand" href="./"><div class="brand-mark"><img src="./rozag-logo.png" alt="RoZAG"></div><div>ROZAG SOCIAL FEED<small>SERVER MANAGEMENT DASHBOARD</small></div></a>
     <div id="user" class="user hidden"><div id="avatar" class="avatar" aria-label="Discord profile avatar">D</div><div id="username" class="username">Discord User</div><a id="logout" class="logout" href="#">↪ Sign out</a></div>
   </div>
 </header>
@@ -86,10 +86,10 @@
       <div class="status-heading">
         <div>
           <div class="eyebrow">LIVE SERVICE STATUS</div>
-          <h2>RoZAG Social Hub</h2>
+          <h2>RoZAG Social Feed</h2>
           <p>Current status of the RoZAG service and connected integrations.</p>
         </div>
-        <img class="status-logo" src="./rozag-logo.png" alt="RoZAG Social Hub">
+        <img class="status-logo" src="./rozag-logo.png" alt="RoZAG Social Feed">
       </div>
 
       <div class="status-grid">
@@ -114,82 +114,7 @@
     </div>
   </section>
 </main>
-<footer>RoZAG Social Hub — secure server management.</footer>
-
-<script>
-(function () {
-  "use strict";
-
-  function getConfig() {
-    return window.ROZAG_DASHBOARD_CONFIG || {};
-  }
-
-  function avatarUrl(user) {
-    if (!user || !user.id || !user.avatar) return null;
-    return "https://cdn.discordapp.com/avatars/" +
-      encodeURIComponent(user.id) + "/" +
-      encodeURIComponent(user.avatar) + ".png?size=128";
-  }
-
-  async function restoreDiscordAvatar() {
-    const cfg = getConfig();
-    const endpoint =
-      cfg.AUTH_ME_URL ||
-      cfg.SESSION_URL ||
-      "https://rozag.coolvetspaces.com/api/session";
-
-    try {
-      const response = await fetch(endpoint, {
-        credentials: "include",
-        cache: "no-store",
-        headers: { "Accept": "application/json" }
-      });
-
-      if (!response.ok) return;
-
-      const data = await response.json();
-      const user = data.user || {};
-      const box = document.getElementById("avatar");
-      const name = document.getElementById("username");
-
-      if (!box || !data.authenticated) return;
-
-      if (name) {
-        name.textContent = user.global_name || user.username || "Discord User";
-      }
-
-      const url = avatarUrl(user);
-      if (!url) return;
-
-      const img = document.createElement("img");
-      img.src = url;
-      img.alt = "Discord profile picture";
-      img.referrerPolicy = "no-referrer";
-
-      img.onload = function () {
-        box.replaceChildren(img);
-      };
-
-      img.onerror = function () {
-        // Leave the existing fallback initial in place if Discord's CDN
-        // does not provide the avatar.
-      };
-    } catch (error) {
-      console.debug("RoZAG avatar restore skipped:", error);
-    }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", restoreDiscordAvatar);
-  } else {
-    restoreDiscordAvatar();
-  }
-
-  // Give the normal dashboard session renderer a moment first, then retry once.
-  window.setTimeout(restoreDiscordAvatar, 1200);
-})();
-</script>
-
+<footer>RoZAG Social Feed — secure server management.</footer>
 <script src="./app.js"></script>
 </body>
 </html>
